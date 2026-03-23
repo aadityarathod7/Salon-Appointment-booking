@@ -1,0 +1,97 @@
+package com.salon.booking.ui.navigation
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.salon.booking.data.repository.AuthRepository
+import com.salon.booking.ui.appointments.AppointmentListScreen
+import com.salon.booking.ui.auth.AuthViewModel
+import com.salon.booking.ui.auth.LoginScreen
+import com.salon.booking.ui.booking.BookingFlowScreen
+import com.salon.booking.ui.home.HomeScreen
+import com.salon.booking.ui.notifications.NotificationScreen
+import com.salon.booking.ui.profile.ProfileScreen
+import com.salon.booking.ui.services.ServiceListScreen
+
+sealed class Screen(val route: String, val title: String, val icon: @Composable () -> Unit) {
+    data object Home : Screen("home", "Home", { Icon(Icons.Filled.Home, contentDescription = "Home") })
+    data object Services : Screen("services", "Services", { Icon(Icons.Filled.ContentCut, contentDescription = "Services") })
+    data object Bookings : Screen("bookings", "Bookings", { Icon(Icons.Filled.CalendarMonth, contentDescription = "Bookings") })
+    data object Notifications : Screen("notifications", "Alerts", { Icon(Icons.Filled.Notifications, contentDescription = "Alerts") })
+    data object Profile : Screen("profile", "Profile", { Icon(Icons.Filled.Person, contentDescription = "Profile") })
+    data object Login : Screen("login", "Login", {})
+    data object BookingFlow : Screen("booking_flow", "Book", {})
+}
+
+val bottomNavItems = listOf(Screen.Home, Screen.Services, Screen.Bookings, Screen.Notifications, Screen.Profile)
+
+@Composable
+fun SalonNavGraph() {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    val navController = rememberNavController()
+
+    if (!isAuthenticated) {
+        LoginScreen(authViewModel = authViewModel)
+    } else {
+        Scaffold(
+            bottomBar = {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                if (currentRoute != Screen.BookingFlow.route) {
+                    NavigationBar {
+                        bottomNavItems.forEach { screen ->
+                            NavigationBarItem(
+                                icon = screen.icon,
+                                label = { Text(screen.title) },
+                                selected = currentRoute == screen.route,
+                                onClick = {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        ) { padding ->
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier.padding(padding)
+            ) {
+                composable(Screen.Home.route) {
+                    HomeScreen(onBookClick = { navController.navigate(Screen.BookingFlow.route) })
+                }
+                composable(Screen.Services.route) {
+                    ServiceListScreen()
+                }
+                composable(Screen.Bookings.route) {
+                    AppointmentListScreen()
+                }
+                composable(Screen.Notifications.route) {
+                    NotificationScreen()
+                }
+                composable(Screen.Profile.route) {
+                    ProfileScreen(onLogout = { authViewModel.logout() })
+                }
+                composable(Screen.BookingFlow.route) {
+                    BookingFlowScreen(onDone = { navController.popBackStack() })
+                }
+            }
+        }
+    }
+}
