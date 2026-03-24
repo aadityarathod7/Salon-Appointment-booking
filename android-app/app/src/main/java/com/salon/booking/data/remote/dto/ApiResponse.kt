@@ -24,8 +24,8 @@ data class OtpVerifyRequest(val phone: String, val otp: String)
 data class RefreshTokenRequest(val refreshToken: String)
 
 data class BookingRequest(
-    val serviceId: Long,
-    val artistId: Long,
+    val serviceId: String,
+    val artistId: String,
     val date: String,
     val startTime: String,
     val paymentMethod: String,
@@ -35,5 +35,5 @@ data class BookingRequest(
 
 data class RescheduleRequest(val date: String, val startTime: String)
 data class CancelRequest(val reason: String? = null)
-data class ReviewRequest(val appointmentId: Long, val rating: Int, val comment: String?)
-data class ValidateCouponRequest(val code: String, val serviceId: Long)
+data class ReviewRequest(val appointmentId: String, val rating: Int, val comment: String?)
+data class ValidateCouponRequest(val code: String, val serviceId: String)

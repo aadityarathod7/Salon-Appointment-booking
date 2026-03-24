@@ -4,6 +4,8 @@ const Appointment = require('../models/Appointment');
 const Artist = require('../models/Artist');
 const Service = require('../models/Service');
 const { Coupon, CouponUsage } = require('../models/Coupon');
+const Waitlist = require('../models/Waitlist');
+const Notification = require('../models/Notification');
 const { auth } = require('../middleware/auth');
 const { apiResponse, generateBookingRef, timeToMinutes } = require('../utils/helpers');
 
@@ -11,20 +13,17 @@ const router = express.Router();
 
 // POST /appointments - Create booking
 router.post('/', auth, async (req, res, next) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { serviceId, artistId, date, startTime, paymentMethod, couponCode, notes } = req.body;
 
-    const artist = await Artist.findById(artistId).session(session);
+    const artist = await Artist.findById(artistId);
     if (!artist || !artist.isActive) {
-      throw Object.assign(new Error('Artist not available'), { statusCode: 400 });
+      return res.status(400).json({ success: false, message: 'Artist not available' });
     }
 
-    const service = await Service.findById(serviceId).session(session);
+    const service = await Service.findById(serviceId);
     if (!service || !service.isActive) {
-      throw Object.assign(new Error('Service not available'), { statusCode: 400 });
+      return res.status(400).json({ success: false, message: 'Service not available' });
     }
 
     // Get duration (check custom)
@@ -39,29 +38,29 @@ router.post('/', auth, async (req, res, next) => {
     // Validate date not in past
     const appointmentDate = new Date(date);
     if (appointmentDate < new Date().setHours(0, 0, 0, 0)) {
-      throw Object.assign(new Error('Cannot book in the past'), { statusCode: 400 });
+      return res.status(400).json({ success: false, message: 'Cannot book in the past' });
     }
 
-    // Check for overlapping appointments (within transaction for atomicity)
+    // Check for overlapping appointments
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const overlapping = await Appointment.find({
+    const existing = await Appointment.find({
       artist: artistId,
       appointmentDate: { $gte: startOfDay, $lte: endOfDay },
       status: { $ne: 'CANCELLED' },
-    }).session(session);
+    });
 
-    const hasConflict = overlapping.some((apt) => {
+    const hasConflict = existing.some((apt) => {
       const aptStart = timeToMinutes(apt.startTime);
       const aptEnd = timeToMinutes(apt.endTime);
       return aptStart < endMins && aptEnd > startMins;
     });
 
     if (hasConflict) {
-      throw Object.assign(new Error('The selected slot is no longer available'), { statusCode: 409 });
+      return res.status(409).json({ success: false, message: 'The selected slot is no longer available' });
     }
 
     // Apply coupon
@@ -69,14 +68,14 @@ router.post('/', auth, async (req, res, next) => {
     let couponDoc = null;
 
     if (couponCode) {
-      couponDoc = await Coupon.findOne({ code: couponCode.toUpperCase() }).session(session);
+      couponDoc = await Coupon.findOne({ code: couponCode.toUpperCase() });
       if (couponDoc) {
         const validation = validateCoupon(couponDoc, req.userId, price);
         if (validation.valid) {
           finalPrice = price - validation.discount;
           if (finalPrice < 0) finalPrice = 0;
           couponDoc.usedCount += 1;
-          await couponDoc.save({ session });
+          await couponDoc.save();
         }
       }
     }
@@ -100,17 +99,15 @@ router.post('/', auth, async (req, res, next) => {
       paymentStatus: 'PENDING',
     });
 
-    await appointment.save({ session });
+    await appointment.save();
 
     if (couponDoc) {
       await new CouponUsage({
         coupon: couponDoc._id,
         user: req.userId,
         appointment: appointment._id,
-      }).save({ session });
+      }).save();
     }
-
-    await session.commitTransaction();
 
     const populated = await Appointment.findById(appointment._id)
       .populate('artist', 'name phone email profileImageUrl bio experienceYears avgRating totalReviews isActive')
@@ -118,10 +115,7 @@ router.post('/', auth, async (req, res, next) => {
 
     res.status(201).json(apiResponse(formatAppointment(populated), 'Booking created'));
   } catch (err) {
-    await session.abortTransaction();
     next(err);
-  } finally {
-    session.endSession();
   }
 });
 
@@ -197,6 +191,33 @@ router.put('/:id/cancel', auth, async (req, res, next) => {
     appointment.cancelledAt = new Date();
     await appointment.save();
 
+    // Notify waitlisted users for this artist/date
+    const startOfDay = new Date(appointment.appointmentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(appointment.appointmentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const waitlistEntries = await Waitlist.find({
+      artist: appointment.artist._id || appointment.artist,
+      preferredDate: { $gte: startOfDay, $lte: endOfDay },
+      status: 'WAITING',
+    }).populate('user');
+
+    for (const entry of waitlistEntries) {
+      entry.status = 'NOTIFIED';
+      entry.notifiedAt = new Date();
+      await entry.save();
+
+      await new Notification({
+        user: entry.user._id,
+        title: 'Slot Available!',
+        body: `A slot has opened up on ${appointment.appointmentDate.toISOString().slice(0, 10)}. Book now before it fills up!`,
+        type: 'WAITLIST_AVAILABLE',
+        referenceId: appointment._id,
+        sentAt: new Date(),
+      }).save();
+    }
+
     res.json(apiResponse(formatAppointment(appointment), 'Appointment cancelled'));
   } catch (err) {
     next(err);
@@ -207,8 +228,14 @@ router.put('/:id/cancel', auth, async (req, res, next) => {
 router.put('/:id/reschedule', auth, async (req, res, next) => {
   try {
     const { date, startTime } = req.body;
-    const appointment = await Appointment.findOne({ _id: req.params.id, user: req.userId });
 
+    // Validate date not in past
+    const newDate = new Date(date);
+    if (newDate < new Date().setHours(0, 0, 0, 0)) {
+      return res.status(400).json({ success: false, message: 'Cannot reschedule to a past date' });
+    }
+
+    const appointment = await Appointment.findOne({ _id: req.params.id, user: req.userId });
     if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
 
     if (!['CONFIRMED', 'PENDING'].includes(appointment.status)) {
@@ -216,10 +243,24 @@ router.put('/:id/reschedule', auth, async (req, res, next) => {
     }
 
     const duration = timeToMinutes(appointment.endTime) - timeToMinutes(appointment.startTime);
-    const newEndMins = timeToMinutes(startTime) + duration;
+    const newStartMins = timeToMinutes(startTime);
+    const newEndMins = newStartMins + duration;
     const newEndTime = `${String(Math.floor(newEndMins / 60)).padStart(2, '0')}:${String(newEndMins % 60).padStart(2, '0')}`;
 
-    // Check overlap
+    // Validate within salon hours
+    const SalonTiming = require('../models/SalonTiming');
+    const dayOfWeek = newDate.getDay();
+    const salonTiming = await SalonTiming.findOne({ dayOfWeek });
+    if (!salonTiming || salonTiming.isClosed) {
+      return res.status(400).json({ success: false, message: 'Salon is closed on that day' });
+    }
+    const salonOpen = timeToMinutes(salonTiming.openTime);
+    const salonClose = timeToMinutes(salonTiming.closeTime);
+    if (newStartMins < salonOpen || newEndMins > salonClose) {
+      return res.status(400).json({ success: false, message: 'Time slot is outside salon hours' });
+    }
+
+    // Check overlap with other appointments
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -235,14 +276,14 @@ router.put('/:id/reschedule', auth, async (req, res, next) => {
     const hasConflict = overlapping.some((apt) => {
       const aptStart = timeToMinutes(apt.startTime);
       const aptEnd = timeToMinutes(apt.endTime);
-      return aptStart < newEndMins && aptEnd > timeToMinutes(startTime);
+      return aptStart < newEndMins && aptEnd > newStartMins;
     });
 
     if (hasConflict) {
       return res.status(409).json({ success: false, message: 'The selected slot is no longer available' });
     }
 
-    appointment.appointmentDate = new Date(date);
+    appointment.appointmentDate = newDate;
     appointment.startTime = startTime;
     appointment.endTime = newEndTime;
     await appointment.save();

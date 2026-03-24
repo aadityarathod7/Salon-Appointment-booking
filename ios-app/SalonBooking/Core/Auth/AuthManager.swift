@@ -13,6 +13,16 @@ class AuthManager: ObservableObject {
         if isAuthenticated {
             Task { await loadProfile() }
         }
+
+        NotificationCenter.default.addObserver(
+            forName: .userSessionExpired,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.logout()
+            }
+        }
     }
 
     func login(emailOrPhone: String, password: String) async {

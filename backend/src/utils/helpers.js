@@ -20,7 +20,11 @@ function hashToken(token) {
 function generateBookingRef(date) {
   const d = new Date(date);
   const dateStr = d.toISOString().slice(0, 10).replace(/-/g, '');
-  const random = Math.floor(100 + Math.random() * 900);
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let random = '';
+  for (let i = 0; i < 6; i++) {
+    random += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
   return `SLN-${dateStr}-${random}`;
 }
 

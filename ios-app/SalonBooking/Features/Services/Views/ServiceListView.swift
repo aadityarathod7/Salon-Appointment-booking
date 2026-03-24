@@ -10,12 +10,16 @@ struct ServiceListView: View {
                     ServiceDetailView(service: service)
                 } label: {
                     HStack(spacing: 12) {
-                        Image(systemName: "scissors")
-                            .font(.title2)
-                            .foregroundColor(.purple)
-                            .frame(width: 50, height: 50)
-                            .background(Color.purple.opacity(0.1))
-                            .cornerRadius(12)
+                        if let imageKey = service.imageUrl {
+                            LocalImage(imageKey, namespace: "Services", width: 56, height: 56, cornerRadius: 12)
+                        } else {
+                            Image(systemName: iconForCategory(service.category))
+                                .font(.title2)
+                                .foregroundColor(.brand)
+                                .frame(width: 56, height: 56)
+                                .background(Color.brandLight.opacity(0.3))
+                                .cornerRadius(12)
+                        }
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(service.name)
@@ -29,7 +33,7 @@ struct ServiceListView: View {
 
                         Text("₹\(service.price, specifier: "%.0f")")
                             .font(.headline)
-                            .foregroundColor(.purple)
+                            .foregroundColor(.brand)
                     }
                     .padding(.vertical, 4)
                 }
@@ -54,15 +58,19 @@ struct ServiceDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                // Service Image placeholder
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.purple.opacity(0.1))
-                    .frame(height: 200)
-                    .overlay {
-                        Image(systemName: "scissors")
+                // Service Image
+                if let imageKey = service.imageUrl {
+                    LocalImage(imageKey, namespace: "Services", width: 400, height: 220, cornerRadius: 0)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+                } else {
+                    ZStack {
+                        Color.brandLight.opacity(0.2).frame(height: 220)
+                        Image(systemName: iconForCategory(service.category))
                             .font(.system(size: 60))
-                            .foregroundColor(.purple)
+                            .foregroundColor(.brand)
                     }
+                }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(service.name)
@@ -73,7 +81,7 @@ struct ServiceDetailView: View {
                         Spacer()
                         Text("₹\(service.price, specifier: "%.0f")")
                             .font(.title2.bold())
-                            .foregroundColor(.purple)
+                            .foregroundColor(.brand)
                     }
 
                     if let description = service.description {
@@ -87,7 +95,7 @@ struct ServiceDetailView: View {
                             .font(.caption)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.purple.opacity(0.1))
+                            .background(Color.brand.opacity(0.1))
                             .cornerRadius(20)
                     }
                 }
@@ -102,7 +110,7 @@ struct ServiceDetailView: View {
                         .frame(height: 50)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.purple)
+                .tint(.brand)
                 .padding(.horizontal)
             }
         }

@@ -7,41 +7,59 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Welcome Banner
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Welcome Back!")
-                            .font(.title2.bold())
-                        Text("What service would you like today?")
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 28) {
+                    // Hero Banner
+                    ZStack(alignment: .bottomLeading) {
+                        LinearGradient(
+                            colors: [.brandDark, .brand],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .frame(height: 200)
+                        .cornerRadius(20)
 
-                    // Quick Book Button
-                    Button {
-                        showBookingFlow = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "calendar.badge.plus")
-                            Text("Book Appointment")
-                                .font(.headline)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Hello, Beautiful!")
+                                .font(.system(size: 26, weight: .bold, design: .serif))
+                                .foregroundColor(.white)
+                            Text("Ready for your next glow-up?")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.85))
+
+                            Button {
+                                showBookingFlow = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "calendar.badge.plus")
+                                    Text("Book Now")
+                                        .fontWeight(.semibold)
+                                }
+                                .font(.subheadline)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                                .background(.white)
+                                .foregroundColor(.brandDark)
+                                .cornerRadius(25)
+                            }
+                            .padding(.top, 4)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
+                        .padding(20)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.purple)
                     .padding(.horizontal)
 
                     // Services Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Our Services")
-                            .font(.title3.bold())
-                            .padding(.horizontal)
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            Text("Our Services")
+                                .font(.system(size: 20, weight: .bold, design: .serif))
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
 
                         ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
+                            HStack(spacing: 14) {
                                 ForEach(serviceVM.services) { service in
                                     ServiceCardView(service: service)
                                 }
@@ -51,9 +69,10 @@ struct HomeView: View {
                     }
 
                     // Artists Section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Our Artists")
-                            .font(.title3.bold())
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Top Artists")
+                            .font(.system(size: 20, weight: .bold, design: .serif))
+                            .foregroundColor(.textPrimary)
                             .padding(.horizontal)
 
                         ForEach(artistVM.artists) { artist in
@@ -69,6 +88,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical)
             }
+            .background(Color.surfaceBg.ignoresSafeArea())
             .navigationTitle("Salon")
             .refreshable {
                 await serviceVM.loadServices()

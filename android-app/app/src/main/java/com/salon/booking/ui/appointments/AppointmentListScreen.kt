@@ -32,6 +32,9 @@ class AppointmentViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     private val _selectedTab = MutableStateFlow("UPCOMING")
     val selectedTab: StateFlow<String> = _selectedTab
 
@@ -43,17 +46,21 @@ class AppointmentViewModel @Inject constructor(
     fun loadAppointments() {
         viewModelScope.launch {
             _isLoading.value = true
-            repository.getAppointments(_selectedTab.value).onSuccess {
-                _appointments.value = it.content
-            }
+            _errorMessage.value = null
+            repository.getAppointments(_selectedTab.value).fold(
+                onSuccess = { _appointments.value = it.content },
+                onFailure = { _errorMessage.value = it.message ?: "Failed to load appointments" }
+            )
             _isLoading.value = false
         }
     }
 
-    fun cancelAppointment(id: Long) {
+    fun cancelAppointment(id: String) {
         viewModelScope.launch {
-            repository.cancelAppointment(id)
-            loadAppointments()
+            repository.cancelAppointment(id).fold(
+                onSuccess = { loadAppointments() },
+                onFailure = { _errorMessage.value = it.message ?: "Failed to cancel" }
+            )
         }
     }
 }
@@ -140,11 +147,11 @@ fun AppointmentCard(appointment: Appointment, onCancel: () -> Unit) {
 @Composable
 fun StatusChip(status: String) {
     val color = when (status) {
-        "CONFIRMED" -> Color(0xFF4CAF50)
-        "PENDING" -> Color(0xFFFF9800)
-        "IN_PROGRESS" -> Color(0xFF2196F3)
-        "COMPLETED" -> Color(0xFF9C27B0)
-        "CANCELLED" -> Color(0xFFF44336)
+        "CONFIRMED" -> Color(0xFF4DB078)
+        "PENDING" -> Color(0xFFE5AD40)
+        "IN_PROGRESS" -> Color(0xFF5B8DEF)
+        "COMPLETED" -> Color(0xFFB85C6B)
+        "CANCELLED" -> Color(0xFFD94D4D)
         else -> Color.Gray
     }
     Surface(

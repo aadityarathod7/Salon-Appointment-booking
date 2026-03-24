@@ -34,7 +34,7 @@ struct AppointmentListView: View {
                 }
             }
             .navigationTitle("My Bookings")
-            .onChange(of: viewModel.selectedTab) {
+            .onChange(of: viewModel.selectedTab) { _, _ in
                 Task { await viewModel.loadAppointments() }
             }
             .task { await viewModel.loadAppointments() }

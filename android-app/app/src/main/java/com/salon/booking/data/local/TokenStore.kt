@@ -22,25 +22,52 @@ class TokenStore @Inject constructor(
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
     }
 
+    // In-memory cache to avoid blocking the main thread
+    @Volatile
+    private var cachedAccessToken: String? = null
+
+    @Volatile
+    private var cachedRefreshToken: String? = null
+
+    @Volatile
+    private var cacheLoaded = false
+
     val accessToken: String?
-        get() = runBlocking {
-            context.dataStore.data.map { it[ACCESS_TOKEN_KEY] }.first()
+        get() {
+            if (!cacheLoaded) loadCacheSync()
+            return cachedAccessToken
         }
 
     val refreshToken: String?
-        get() = runBlocking {
-            context.dataStore.data.map { it[REFRESH_TOKEN_KEY] }.first()
+        get() {
+            if (!cacheLoaded) loadCacheSync()
+            return cachedRefreshToken
         }
+
+    private fun loadCacheSync() {
+        // Only blocks once at app startup, then uses cache
+        runBlocking {
+            cachedAccessToken = context.dataStore.data.map { it[ACCESS_TOKEN_KEY] }.first()
+            cachedRefreshToken = context.dataStore.data.map { it[REFRESH_TOKEN_KEY] }.first()
+            cacheLoaded = true
+        }
+    }
 
     suspend fun saveTokens(accessToken: String, refreshToken: String) {
         context.dataStore.edit { prefs ->
             prefs[ACCESS_TOKEN_KEY] = accessToken
             prefs[REFRESH_TOKEN_KEY] = refreshToken
         }
+        cachedAccessToken = accessToken
+        cachedRefreshToken = refreshToken
+        cacheLoaded = true
     }
 
     suspend fun clearTokens() {
         context.dataStore.edit { it.clear() }
+        cachedAccessToken = null
+        cachedRefreshToken = null
+        cacheLoaded = true
     }
 
     fun hasToken(): Boolean = accessToken != null

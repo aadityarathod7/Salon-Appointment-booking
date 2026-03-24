@@ -34,21 +34,21 @@ interface SalonApi {
     suspend fun getServices(@Query("category") category: String? = null): ApiResponse<List<SalonService>>
 
     @GET("services/{id}")
-    suspend fun getService(@Path("id") id: Long): ApiResponse<SalonService>
+    suspend fun getService(@Path("id") id: String): ApiResponse<SalonService>
 
     @GET("services/{id}/artists")
-    suspend fun getArtistsForService(@Path("id") serviceId: Long): ApiResponse<List<Artist>>
+    suspend fun getArtistsForService(@Path("id") serviceId: String): ApiResponse<List<Artist>>
 
     // Artists
     @GET("artists")
     suspend fun getArtists(): ApiResponse<List<Artist>>
 
     @GET("artists/{id}")
-    suspend fun getArtist(@Path("id") id: Long): ApiResponse<Artist>
+    suspend fun getArtist(@Path("id") id: String): ApiResponse<Artist>
 
     @GET("artists/{id}/reviews")
     suspend fun getArtistReviews(
-        @Path("id") id: Long,
+        @Path("id") id: String,
         @Query("page") page: Int = 0,
         @Query("size") size: Int = 20
     ): ApiResponse<PaginatedResponse<Review>>
@@ -56,8 +56,8 @@ interface SalonApi {
     // Slots
     @GET("slots/available")
     suspend fun getAvailableSlots(
-        @Query("artistId") artistId: Long,
-        @Query("serviceId") serviceId: Long,
+        @Query("artistId") artistId: String,
+        @Query("serviceId") serviceId: String,
         @Query("date") date: String
     ): ApiResponse<SlotResponse>
 
@@ -73,13 +73,13 @@ interface SalonApi {
     ): ApiResponse<PaginatedResponse<Appointment>>
 
     @GET("appointments/{id}")
-    suspend fun getAppointment(@Path("id") id: Long): ApiResponse<Appointment>
+    suspend fun getAppointment(@Path("id") id: String): ApiResponse<Appointment>
 
     @PUT("appointments/{id}/cancel")
-    suspend fun cancelAppointment(@Path("id") id: Long, @Body request: CancelRequest): ApiResponse<Appointment>
+    suspend fun cancelAppointment(@Path("id") id: String, @Body request: CancelRequest): ApiResponse<Appointment>
 
     @PUT("appointments/{id}/reschedule")
-    suspend fun rescheduleAppointment(@Path("id") id: Long, @Body request: RescheduleRequest): ApiResponse<Appointment>
+    suspend fun rescheduleAppointment(@Path("id") id: String, @Body request: RescheduleRequest): ApiResponse<Appointment>
 
     // Reviews
     @POST("reviews")
@@ -97,7 +97,7 @@ interface SalonApi {
     ): ApiResponse<PaginatedResponse<AppNotification>>
 
     @PUT("notifications/{id}/read")
-    suspend fun markNotificationRead(@Path("id") id: Long): ApiResponse<Unit>
+    suspend fun markNotificationRead(@Path("id") id: String): ApiResponse<Unit>
 
     @PUT("notifications/read-all")
     suspend fun markAllNotificationsRead(): ApiResponse<Unit>

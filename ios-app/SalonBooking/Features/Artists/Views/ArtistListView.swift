@@ -9,9 +9,18 @@ struct ArtistDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 // Artist Header
                 HStack(spacing: 16) {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 70))
-                        .foregroundColor(.purple)
+                    if let imageKey = artist.profileImageUrl, !imageKey.isEmpty {
+                        LocalImage(imageKey, namespace: "Artists", width: 80, height: 80, cornerRadius: 40)
+                    } else {
+                        ZStack {
+                            Circle()
+                                .fill(Color.brandLight.opacity(0.5))
+                                .frame(width: 80, height: 80)
+                            Text(String(artist.name.prefix(1)))
+                                .font(.system(size: 30, weight: .bold, design: .serif))
+                                .foregroundColor(.brandDark)
+                        }
+                    }
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(artist.name)
@@ -66,7 +75,7 @@ struct ArtistDetailView: View {
                         .frame(height: 50)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.purple)
+                .tint(.brand)
                 .padding(.horizontal)
             }
             .padding(.vertical)

@@ -33,10 +33,18 @@ fun BookingFlowScreen(
     // Show confirmation dialog
     bookedAppointment?.let { apt ->
         AlertDialog(
-            onDismissRequest = onDone,
+            onDismissRequest = {
+                viewModel.clearBookedAppointment()
+                onDone()
+            },
             title = { Text("Booking Confirmed!") },
             text = { Text("Ref: ${apt.bookingRef}\n${apt.appointmentDate} at ${apt.startTime}") },
-            confirmButton = { TextButton(onClick = onDone) { Text("Done") } }
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearBookedAppointment()
+                    onDone()
+                }) { Text("Done") }
+            }
         )
     }
 
@@ -130,7 +138,7 @@ fun ArtistStepContent(viewModel: BookingViewModel) {
                     modifier = Modifier.fillMaxWidth().clickable { viewModel.selectArtist(artist) }
                 ) {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                        com.salon.booking.ui.components.RemoteImage(url = artist.profileImageUrl, size = 48.dp, isCircle = true)
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(artist.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)

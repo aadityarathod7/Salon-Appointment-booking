@@ -38,14 +38,14 @@ async function seed() {
 
   // Create services
   const services = await Service.insertMany([
-    { name: 'Haircut', description: 'Professional haircut and styling', durationMinutes: 30, price: 500, category: 'Hair', sortOrder: 1 },
-    { name: 'Hair Coloring', description: 'Full hair coloring with premium products', durationMinutes: 90, price: 2000, category: 'Hair', sortOrder: 2 },
-    { name: 'Hair Spa', description: 'Deep conditioning hair spa treatment', durationMinutes: 60, price: 1500, category: 'Hair', sortOrder: 3 },
-    { name: 'Facial', description: 'Refreshing facial treatment', durationMinutes: 45, price: 1000, category: 'Skin', sortOrder: 4 },
-    { name: 'Cleanup', description: 'Quick skin cleanup', durationMinutes: 30, price: 600, category: 'Skin', sortOrder: 5 },
-    { name: 'Manicure', description: 'Professional nail care for hands', durationMinutes: 30, price: 400, category: 'Nails', sortOrder: 6 },
-    { name: 'Pedicure', description: 'Professional nail care for feet', durationMinutes: 45, price: 500, category: 'Nails', sortOrder: 7 },
-    { name: 'Beard Trim', description: 'Precise beard trimming and shaping', durationMinutes: 20, price: 200, category: 'Hair', sortOrder: 8 },
+    { name: 'Haircut', description: 'Professional haircut and styling with precision cutting techniques. Includes wash, cut, and blow dry.', durationMinutes: 30, price: 500, category: 'Hair', sortOrder: 1, imageUrl: 'haircut' },
+    { name: 'Hair Coloring', description: 'Full hair coloring with premium ammonia-free products. Includes consultation and aftercare tips.', durationMinutes: 90, price: 2000, category: 'Hair', sortOrder: 2, imageUrl: 'hair_coloring' },
+    { name: 'Hair Spa', description: 'Deep conditioning hair spa treatment with hot oil massage. Repairs damage and adds shine.', durationMinutes: 60, price: 1500, category: 'Hair', sortOrder: 3, imageUrl: 'hair_spa' },
+    { name: 'Facial', description: 'Refreshing facial treatment with cleansing, exfoliation, mask, and moisturizing. Leaves skin glowing.', durationMinutes: 45, price: 1000, category: 'Skin', sortOrder: 4, imageUrl: 'facial' },
+    { name: 'Cleanup', description: 'Quick skin cleanup with deep cleansing and blackhead removal. Perfect for a fresh look.', durationMinutes: 30, price: 600, category: 'Skin', sortOrder: 5, imageUrl: 'cleanup' },
+    { name: 'Manicure', description: 'Professional nail care for hands including shaping, cuticle care, and polish application.', durationMinutes: 30, price: 400, category: 'Nails', sortOrder: 6, imageUrl: 'manicure' },
+    { name: 'Pedicure', description: 'Relaxing pedicure with foot soak, scrub, nail shaping, and polish. Includes foot massage.', durationMinutes: 45, price: 500, category: 'Nails', sortOrder: 7, imageUrl: 'pedicure' },
+    { name: 'Beard Trim', description: 'Precise beard trimming and shaping with hot towel treatment. Clean lines guaranteed.', durationMinutes: 20, price: 200, category: 'Hair', sortOrder: 8, imageUrl: 'beard_trim' },
   ]);
   console.log(`${services.length} services created`);
 
@@ -55,7 +55,8 @@ async function seed() {
       name: 'Priya Sharma',
       phone: '9876500001',
       email: 'priya@salon.com',
-      bio: 'Expert in hair styling and coloring with 8 years of experience.',
+      profileImageUrl: 'priya',
+      bio: 'Expert in hair styling and coloring with 8 years of experience. Specializes in balayage, highlights, and trendy cuts.',
       experienceYears: 8,
       sortOrder: 1,
       availability: [
@@ -83,7 +84,8 @@ async function seed() {
       name: 'Rahul Verma',
       phone: '9876500002',
       email: 'rahul@salon.com',
-      bio: 'Skin care specialist with expertise in facials and treatments.',
+      profileImageUrl: 'rahul',
+      bio: 'Skin care specialist with expertise in facials, cleanups, and grooming. Known for his attention to detail.',
       experienceYears: 5,
       sortOrder: 2,
       availability: [
@@ -112,7 +114,8 @@ async function seed() {
       name: 'Anita Patel',
       phone: '9876500003',
       email: 'anita@salon.com',
-      bio: 'Nail art specialist and all-round beauty expert.',
+      profileImageUrl: 'anita',
+      bio: 'Nail art specialist and all-round beauty expert. Creates stunning nail designs and relaxing spa experiences.',
       experienceYears: 6,
       sortOrder: 3,
       availability: [
@@ -137,9 +140,9 @@ async function seed() {
   ]);
   console.log(`${artists.length} artists created`);
 
-  // Create salon timings (Mon-Sat open, Sun closed)
+  // Create salon timings (All days open)
   const timings = [
-    { dayOfWeek: 0, isClosed: true },
+    { dayOfWeek: 0, openTime: '10:00', closeTime: '20:00', isClosed: false },
     { dayOfWeek: 1, openTime: '09:00', closeTime: '21:00', isClosed: false },
     { dayOfWeek: 2, openTime: '09:00', closeTime: '21:00', isClosed: false },
     { dayOfWeek: 3, openTime: '09:00', closeTime: '21:00', isClosed: false },

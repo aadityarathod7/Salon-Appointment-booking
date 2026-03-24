@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFCE93D8</color>
-    <color name="purple_500">#FF9C27B0</color>
-    <color name="purple_700">#FF7B1FA2</color>
+    <color name="brand">#FFB85C6B</color>
+    <color name="brand_dark">#FF8C384D</color>
+    <color name="brand_light">#FFEBC0C7</color>
+    <color name="accent_gold">#FFCCA666</color>
+    <color name="surface_bg">#FFF5F0ED</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
 </resources>

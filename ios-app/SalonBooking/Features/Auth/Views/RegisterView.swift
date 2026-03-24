@@ -41,7 +41,6 @@ struct RegisterView: View {
                                 phone: phone.isEmpty ? nil : phone,
                                 password: password.isEmpty ? nil : password
                             )
-                            if authManager.isAuthenticated { dismiss() }
                         }
                     } label: {
                         if authManager.isLoading {
@@ -55,6 +54,9 @@ struct RegisterView: View {
             }
             .navigationTitle("Register")
             .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: authManager.isAuthenticated) { _, isAuth in
+                if isAuth { dismiss() }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

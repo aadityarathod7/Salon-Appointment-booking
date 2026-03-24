@@ -9,83 +9,144 @@ struct LoginView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Spacer()
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    colors: [Color.brandDark, Color.brand, Color.brandLight.opacity(0.6)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                // Logo
-                VStack(spacing: 8) {
-                    Image(systemName: "scissors")
-                        .font(.system(size: 60))
-                        .foregroundColor(.purple)
-                    Text("Salon Booking")
-                        .font(.largeTitle.bold())
-                    Text("Book your perfect look")
-                        .foregroundColor(.secondary)
-                }
+                VStack(spacing: 0) {
+                    Spacer()
 
-                Spacer()
+                    // Logo Section
+                    VStack(spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(.white.opacity(0.15))
+                                .frame(width: 100, height: 100)
+                            Image(systemName: "scissors")
+                                .font(.system(size: 44, weight: .light))
+                                .foregroundColor(.white)
+                        }
 
-                // Login Form
-                VStack(spacing: 16) {
-                    TextField("Email or Phone", text: $emailOrPhone)
-                        .textFieldStyle(.roundedBorder)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.emailAddress)
+                        Text("Glamour Studio")
+                            .font(.system(size: 32, weight: .bold, design: .serif))
+                            .foregroundColor(.white)
 
-                    SecureField("Password", text: $password)
-                        .textFieldStyle(.roundedBorder)
-
-                    if let error = authManager.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.caption)
+                        Text("Book your perfect look")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.8))
                     }
 
-                    Button {
-                        Task { await authManager.login(emailOrPhone: emailOrPhone, password: password) }
-                    } label: {
-                        if authManager.isLoading {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                        } else {
-                            Text("Login")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                    Spacer().frame(height: 50)
+
+                    // Login Card
+                    VStack(spacing: 20) {
+                        VStack(spacing: 14) {
+                            HStack {
+                                Image(systemName: "envelope")
+                                    .foregroundColor(.textSecondary)
+                                    .frame(width: 20)
+                                TextField("Email or Phone", text: $emailOrPhone)
+                                    .textInputAutocapitalization(.never)
+                                    .keyboardType(.emailAddress)
+                            }
+                            .padding()
+                            .background(Color.surfaceBg)
+                            .cornerRadius(12)
+
+                            HStack {
+                                Image(systemName: "lock")
+                                    .foregroundColor(.textSecondary)
+                                    .frame(width: 20)
+                                SecureField("Password", text: $password)
+                            }
+                            .padding()
+                            .background(Color.surfaceBg)
+                            .cornerRadius(12)
+                        }
+
+                        if let error = authManager.errorMessage {
+                            Text(error)
+                                .foregroundColor(.danger)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                        }
+
+                        Button {
+                            Task { await authManager.login(emailOrPhone: emailOrPhone, password: password) }
+                        } label: {
+                            HStack {
+                                if authManager.isLoading {
+                                    ProgressView()
+                                        .tint(.white)
+                                } else {
+                                    Text("Sign In")
+                                        .font(.headline)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(
+                                LinearGradient(colors: [.brand, .brandDark], startPoint: .leading, endPoint: .trailing)
+                            )
+                            .foregroundColor(.white)
+                            .cornerRadius(14)
+                            .shadow(color: .brand.opacity(0.4), radius: 8, y: 4)
+                        }
+                        .disabled(emailOrPhone.isEmpty || password.isEmpty || authManager.isLoading)
+                        .opacity(emailOrPhone.isEmpty || password.isEmpty ? 0.6 : 1)
+
+                        // Divider
+                        HStack {
+                            Rectangle().frame(height: 0.5).foregroundColor(.gray.opacity(0.3))
+                            Text("OR").foregroundColor(.textSecondary).font(.caption2)
+                            Rectangle().frame(height: 0.5).foregroundColor(.gray.opacity(0.3))
+                        }
+
+                        Button {
+                            showOtpLogin = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "phone.fill")
+                                Text("Login with OTP")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(Color.surfaceBg)
+                            .foregroundColor(.brand)
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.brandLight, lineWidth: 1)
+                            )
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.purple)
-                    .disabled(emailOrPhone.isEmpty || password.isEmpty || authManager.isLoading)
-                }
+                    .padding(24)
+                    .background(.white)
+                    .cornerRadius(24)
+                    .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
+                    .padding(.horizontal, 20)
 
-                // Divider
-                HStack {
-                    Rectangle().frame(height: 1).foregroundColor(.gray.opacity(0.3))
-                    Text("OR").foregroundColor(.secondary).font(.caption)
-                    Rectangle().frame(height: 1).foregroundColor(.gray.opacity(0.3))
-                }
+                    Spacer()
 
-                // OTP Login
-                Button("Login with OTP") {
-                    showOtpLogin = true
-                }
-                .foregroundColor(.purple)
-
-                Spacer()
-
-                // Register
-                HStack {
-                    Text("Don't have an account?")
-                        .foregroundColor(.secondary)
-                    Button("Register") {
-                        showRegister = true
+                    // Register
+                    HStack(spacing: 4) {
+                        Text("Don't have an account?")
+                            .foregroundColor(.white.opacity(0.8))
+                        Button("Register") {
+                            showRegister = true
+                        }
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
                     }
-                    .foregroundColor(.purple)
+                    .font(.subheadline)
+                    .padding(.bottom, 30)
                 }
             }
-            .padding(.horizontal, 32)
             .sheet(isPresented: $showRegister) {
                 RegisterView()
             }

@@ -56,6 +56,10 @@ class BookingViewModel @Inject constructor(
     private val _bookedAppointment = MutableStateFlow<Appointment?>(null)
     val bookedAppointment: StateFlow<Appointment?> = _bookedAppointment
 
+    fun clearBookedAppointment() {
+        _bookedAppointment.value = null
+    }
+
     fun loadServices() {
         viewModelScope.launch {
             repository.getServices().onSuccess { _services.value = it }
@@ -67,7 +71,11 @@ class BookingViewModel @Inject constructor(
         _currentStep.value = BookingStep.SELECT_ARTIST
         viewModelScope.launch {
             _isLoading.value = true
-            repository.getArtistsForService(service.id).onSuccess { _artists.value = it }
+            _errorMessage.value = null
+            repository.getArtistsForService(service.id).fold(
+                onSuccess = { _artists.value = it },
+                onFailure = { _errorMessage.value = it.message ?: "Failed to load artists" }
+            )
             _isLoading.value = false
         }
     }
@@ -96,6 +104,7 @@ class BookingViewModel @Inject constructor(
     }
 
     fun goBack() {
+        _errorMessage.value = null
         val prev = when (_currentStep.value) {
             BookingStep.SELECT_ARTIST -> BookingStep.SELECT_SERVICE
             BookingStep.SELECT_DATE -> BookingStep.SELECT_ARTIST
@@ -113,9 +122,11 @@ class BookingViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isLoading.value = true
-            repository.getAvailableSlots(artist.id, service.id, dateStr).onSuccess {
-                _slots.value = it.slots
-            }
+            _errorMessage.value = null
+            repository.getAvailableSlots(artist.id, service.id, dateStr).fold(
+                onSuccess = { _slots.value = it.slots },
+                onFailure = { _errorMessage.value = it.message ?: "Failed to load slots" }
+            )
             _isLoading.value = false
         }
     }

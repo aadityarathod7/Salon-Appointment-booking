@@ -76,12 +76,23 @@ async function getAvailableSlots(artistId, serviceId, dateStr) {
     availableWindows.push(...windows);
   }
 
-  // 7. Generate slots
+  // 7. Filter out past slots if date is today
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const currentMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
+
+  // 8. Generate slots
   const slots = [];
   for (const [wStart, wEnd] of availableWindows) {
     let slotStart = wStart;
     while (slotStart + duration <= wEnd) {
       const slotEnd = slotStart + duration;
+
+      // Skip past slots for today
+      if (isToday && slotStart <= currentMinutes) {
+        slotStart += SLOT_INTERVAL;
+        continue;
+      }
 
       // Check overlap with existing appointments
       const isBooked = existingAppointments.some((apt) => {

@@ -37,18 +37,15 @@ fun ServiceListScreen(viewModel: ServiceViewModel = hiltViewModel()) {
                 items(services) { service ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Surface(
-                                shape = MaterialTheme.shapes.medium,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(50.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(Icons.Filled.ContentCut, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                                }
-                            }
+                            com.salon.booking.ui.components.ServiceImage(
+                                url = service.imageUrl,
+                                width = 56.dp,
+                                height = 56.dp,
+                                cornerRadius = 12.dp
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(service.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)

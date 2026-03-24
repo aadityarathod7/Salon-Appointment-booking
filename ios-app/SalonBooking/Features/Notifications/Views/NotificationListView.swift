@@ -3,6 +3,7 @@ import SwiftUI
 struct NotificationListView: View {
     @State private var notifications: [AppNotification] = []
     @State private var isLoading = false
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -17,7 +18,7 @@ struct NotificationListView: View {
                     List(notifications) { notification in
                         HStack(spacing: 12) {
                             Image(systemName: notificationIcon(notification.type))
-                                .foregroundColor(.purple)
+                                .foregroundColor(.brand)
                                 .frame(width: 32)
 
                             VStack(alignment: .leading, spacing: 4) {
@@ -47,11 +48,12 @@ struct NotificationListView: View {
 
     func loadNotifications() async {
         isLoading = true
+        errorMessage = nil
         do {
             let response: ApiResponse<PaginatedResponse<AppNotification>> = try await APIClient.shared.get("/notifications?page=0&size=50")
             notifications = response.data?.content ?? []
         } catch {
-            // Handle error
+            errorMessage = error.localizedDescription
         }
         isLoading = false
     }
@@ -60,7 +62,9 @@ struct NotificationListView: View {
         do {
             let _: ApiResponse<String> = try await APIClient.shared.put("/notifications/read-all")
             await loadNotifications()
-        } catch {}
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     func notificationIcon(_ type: String) -> String {

@@ -6,17 +6,43 @@ struct RatingStarsView: View {
     let maxRating: Int = 5
 
     var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 3) {
             ForEach(1...maxRating, id: \.self) { index in
                 Image(systemName: index <= Int(rating) ? "star.fill" :
                     (Double(index) - 0.5 <= rating ? "star.leadinghalf.filled" : "star"))
-                    .foregroundColor(.orange)
-                    .font(.caption)
+                    .foregroundColor(.accent)
+                    .font(.caption2)
             }
             Text(String(format: "%.1f", rating))
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(.caption2.bold())
+                .foregroundColor(.textSecondary)
         }
+    }
+}
+
+// MARK: - Local Asset Image
+struct LocalImage: View {
+    let name: String
+    let namespace: String
+    let width: CGFloat
+    let height: CGFloat
+    let cornerRadius: CGFloat
+
+    init(_ name: String, namespace: String = "Services", width: CGFloat = 100, height: CGFloat = 100, cornerRadius: CGFloat = 12) {
+        self.name = name
+        self.namespace = namespace
+        self.width = width
+        self.height = height
+        self.cornerRadius = cornerRadius
+    }
+
+    var body: some View {
+        Image("\(namespace)/\(name)")
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: width, height: height)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }
 
@@ -29,20 +55,29 @@ struct SlotChipView: View {
     var body: some View {
         Button(action: onTap) {
             Text(slot.startTime)
-                .font(.subheadline.bold())
+                .font(.subheadline.weight(.medium))
                 .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+                .padding(.vertical, 11)
                 .background(
                     slot.available
-                        ? (isSelected ? Color.purple : Color.purple.opacity(0.1))
-                        : Color.gray.opacity(0.2)
+                        ? (isSelected
+                            ? LinearGradient(colors: [.brand, .brandDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            : LinearGradient(colors: [Color.brandLight.opacity(0.3), Color.brandLight.opacity(0.3)], startPoint: .top, endPoint: .bottom))
+                        : LinearGradient(colors: [Color.gray.opacity(0.1), Color.gray.opacity(0.1)], startPoint: .top, endPoint: .bottom)
                 )
                 .foregroundColor(
                     slot.available
-                        ? (isSelected ? .white : .purple)
-                        : .gray
+                        ? (isSelected ? .white : .brand)
+                        : .gray.opacity(0.5)
                 )
-                .cornerRadius(10)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            slot.available && !isSelected ? Color.brandLight : Color.clear,
+                            lineWidth: 1
+                        )
+                )
         }
         .disabled(!slot.available)
     }
@@ -53,31 +88,47 @@ struct ServiceCardView: View {
     let service: SalonService
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.purple.opacity(0.1))
-                .frame(width: 140, height: 100)
-                .overlay {
-                    Image(systemName: "scissors")
-                        .font(.title)
-                        .foregroundColor(.purple)
+        VStack(alignment: .leading, spacing: 0) {
+            if let imageKey = service.imageUrl {
+                LocalImage(imageKey, namespace: "Services", width: 160, height: 110, cornerRadius: 0)
+            } else {
+                ZStack {
+                    Color.brandLight.opacity(0.2)
+                    Image(systemName: iconForCategory(service.category))
+                        .font(.system(size: 32, weight: .light))
+                        .foregroundColor(.brand)
                 }
-
-            Text(service.name)
-                .font(.subheadline.bold())
-                .lineLimit(1)
-
-            HStack {
-                Text("\(service.durationMinutes)m")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text("₹\(service.price, specifier: "%.0f")")
-                    .font(.subheadline.bold())
-                    .foregroundColor(.purple)
+                .frame(width: 160, height: 110)
             }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(service.name)
+                    .font(.subheadline.bold())
+                    .foregroundColor(.textPrimary)
+                    .lineLimit(1)
+
+                HStack {
+                    HStack(spacing: 3) {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                        Text("\(service.durationMinutes)m")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.textSecondary)
+
+                    Spacer()
+
+                    Text("₹\(service.price, specifier: "%.0f")")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.brand)
+                }
+            }
+            .padding(10)
         }
-        .frame(width: 140)
+        .frame(width: 160)
+        .background(.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.06), radius: 8, y: 3)
     }
 }
 
@@ -86,29 +137,45 @@ struct ArtistCardView: View {
     let artist: Artist
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "person.circle.fill")
-                .font(.system(size: 50))
-                .foregroundColor(.purple)
+        HStack(spacing: 14) {
+            if let imageKey = artist.profileImageUrl, !imageKey.isEmpty {
+                LocalImage(imageKey, namespace: "Artists", width: 60, height: 60, cornerRadius: 30)
+            } else {
+                ZStack {
+                    Circle()
+                        .fill(Color.brandLight.opacity(0.5))
+                        .frame(width: 60, height: 60)
+                    Text(String(artist.name.prefix(1)))
+                        .font(.system(size: 22, weight: .bold, design: .serif))
+                        .foregroundColor(.brandDark)
+                }
+            }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(artist.name)
                     .font(.headline)
+                    .foregroundColor(.textPrimary)
+
                 RatingStarsView(rating: artist.avgRating)
-                Text("\(artist.experienceYears) yrs exp")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+
+                HStack(spacing: 12) {
+                    Label("\(artist.experienceYears) yrs", systemImage: "briefcase")
+                    Label("\(artist.totalReviews) reviews", systemImage: "text.bubble")
+                }
+                .font(.caption)
+                .foregroundColor(.textSecondary)
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundColor(.secondary)
+                .font(.caption)
+                .foregroundColor(.textSecondary.opacity(0.5))
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 5, y: 2)
+        .padding(14)
+        .background(.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.04), radius: 8, y: 3)
     }
 }
 
@@ -118,70 +185,107 @@ struct AppointmentCardView: View {
     let onCancel: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text(appointment.bookingRef)
-                    .font(.caption.bold())
-                    .foregroundColor(.purple)
+                HStack(spacing: 6) {
+                    Image(systemName: "number")
+                        .font(.caption2)
+                    Text(appointment.bookingRef)
+                        .font(.caption.bold())
+                }
+                .foregroundColor(.brand)
+
                 Spacer()
                 StatusBadge(status: appointment.status)
             }
 
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.brandLight.opacity(0.3))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "scissors")
+                        .font(.body)
+                        .foregroundColor(.brand)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
                     Text(appointment.service.name)
                         .font(.headline)
-                    Text("with \(appointment.artist.name)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textPrimary)
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                            .font(.caption2)
+                        Text(appointment.artist.name)
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.textSecondary)
                 }
                 Spacer()
-                VStack(alignment: .trailing, spacing: 4) {
+                VStack(alignment: .trailing, spacing: 3) {
                     Text(appointment.appointmentDate)
                         .font(.subheadline.bold())
-                    Text("\(appointment.startTime) - \(appointment.endTime)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.textPrimary)
+                    HStack(spacing: 3) {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                        Text("\(appointment.startTime) - \(appointment.endTime)")
+                    }
+                    .font(.caption)
+                    .foregroundColor(.textSecondary)
                 }
             }
 
             HStack {
                 Text("₹\(appointment.finalPrice, specifier: "%.0f")")
-                    .font(.headline)
-                    .foregroundColor(.purple)
+                    .font(.title3.bold())
+                    .foregroundColor(.brand)
 
                 Spacer()
 
                 if appointment.status == "CONFIRMED" || appointment.status == "PENDING" {
-                    Button("Cancel", role: .destructive, action: onCancel)
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
+                    Button {
+                        onCancel()
+                    } label: {
+                        Text("Cancel")
+                            .font(.caption.bold())
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(Color.danger.opacity(0.1))
+                            .foregroundColor(.danger)
+                            .cornerRadius(8)
+                    }
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(16)
+        .background(.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.04), radius: 8, y: 3)
     }
 }
 
+// MARK: - Status Badge
 struct StatusBadge: View {
     let status: String
 
     var body: some View {
-        Text(status)
+        Text(status.replacingOccurrences(of: "_", with: " "))
             .font(.caption2.bold())
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(statusColor.opacity(0.1))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(statusColor.opacity(0.12))
             .foregroundColor(statusColor)
-            .cornerRadius(6)
+            .cornerRadius(8)
     }
 
     var statusColor: Color {
         switch status {
-        case "CONFIRMED": return .green
-        case "PENDING": return .orange
+        case "CONFIRMED": return .success
+        case "PENDING": return .warning
         case "IN_PROGRESS": return .blue
-        case "COMPLETED": return .purple
-        case "CANCELLED": return .red
+        case "COMPLETED": return .brand
+        case "CANCELLED": return .danger
         case "NO_SHOW": return .gray
         default: return .gray
         }

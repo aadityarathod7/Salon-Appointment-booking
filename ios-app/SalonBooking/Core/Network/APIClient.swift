@@ -1,5 +1,9 @@
 import Foundation
 
+extension Notification.Name {
+    static let userSessionExpired = Notification.Name("userSessionExpired")
+}
+
 enum APIError: LocalizedError {
     case invalidURL
     case invalidResponse
@@ -76,6 +80,9 @@ class APIClient {
                         )
                     }
                 }
+                // Refresh failed — clear tokens so AuthManager detects logout
+                TokenManager.shared.clearTokens()
+                NotificationCenter.default.post(name: .userSessionExpired, object: nil)
                 throw APIError.unauthorized
             }
 

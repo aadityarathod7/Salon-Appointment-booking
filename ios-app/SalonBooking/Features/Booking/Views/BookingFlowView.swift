@@ -3,6 +3,7 @@ import SwiftUI
 struct BookingFlowView: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = BookingViewModel()
+    @State private var showConfirmation = false
 
     var preselectedService: SalonService?
     var preselectedArtist: Artist?
@@ -12,7 +13,7 @@ struct BookingFlowView: View {
             VStack {
                 // Progress indicator
                 ProgressView(value: Double(viewModel.currentStep.rawValue + 1), total: Double(BookingStep.allCases.count))
-                    .tint(.purple)
+                    .tint(.brand)
                     .padding(.horizontal)
 
                 // Step content
@@ -41,18 +42,25 @@ struct BookingFlowView: View {
             .task {
                 if let service = preselectedService {
                     viewModel.selectedService = service
-                    viewModel.currentStep = .selectArtist
-                }
-                if let artist = preselectedArtist {
-                    viewModel.selectedArtist = artist
-                    if viewModel.selectedService != nil {
+                    if let artist = preselectedArtist {
+                        viewModel.selectedArtist = artist
                         viewModel.currentStep = .selectDate
+                    } else {
+                        viewModel.currentStep = .selectArtist
+                        await viewModel.loadArtists()
                     }
+                } else {
+                    await viewModel.loadServices()
                 }
-                await viewModel.loadServices()
             }
-            .alert("Booking Confirmed!", isPresented: .constant(viewModel.bookedAppointment != nil)) {
-                Button("Done") { dismiss() }
+            .onChange(of: viewModel.bookedAppointment != nil) { _, isBooked in
+                if isBooked { showConfirmation = true }
+            }
+            .alert("Booking Confirmed!", isPresented: $showConfirmation) {
+                Button("Done") {
+                    viewModel.bookedAppointment = nil
+                    dismiss()
+                }
             } message: {
                 if let apt = viewModel.bookedAppointment {
                     Text("Ref: \(apt.bookingRef)\n\(apt.appointmentDate) at \(apt.startTime)")
@@ -91,9 +99,9 @@ struct SelectServiceView: View {
                     }
                     Spacer()
                     Text("₹\(service.price, specifier: "%.0f")")
-                        .font(.headline).foregroundColor(.purple)
+                        .font(.headline).foregroundColor(.brand)
                     if viewModel.selectedService?.id == service.id {
-                        Image(systemName: "checkmark.circle.fill").foregroundColor(.purple)
+                        Image(systemName: "checkmark.circle.fill").foregroundColor(.brand)
                     }
                 }
             }
@@ -121,7 +129,7 @@ struct SelectArtistView: View {
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: "person.circle.fill")
-                                .font(.title).foregroundColor(.purple)
+                                .font(.title).foregroundColor(.brand)
                             VStack(alignment: .leading) {
                                 Text(artist.name).font(.headline)
                                 HStack {
@@ -131,7 +139,7 @@ struct SelectArtistView: View {
                             }
                             Spacer()
                             if viewModel.selectedArtist?.id == artist.id {
-                                Image(systemName: "checkmark.circle.fill").foregroundColor(.purple)
+                                Image(systemName: "checkmark.circle.fill").foregroundColor(.brand)
                             }
                         }
                     }
@@ -154,7 +162,7 @@ struct SelectDateView: View {
         VStack(spacing: 20) {
             DatePicker("Select Date", selection: $viewModel.selectedDate, in: Date()..., displayedComponents: .date)
                 .datePickerStyle(.graphical)
-                .tint(.purple)
+                .tint(.brand)
                 .padding()
 
             Button {
@@ -167,7 +175,7 @@ struct SelectDateView: View {
                     .frame(height: 50)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.purple)
+            .tint(.brand)
             .padding(.horizontal)
 
             Button("Back") { viewModel.goBack() }
@@ -217,12 +225,17 @@ struct SelectSlotView: View {
                         .frame(height: 50)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.purple)
+                .tint(.brand)
                 .disabled(viewModel.selectedSlot == nil)
 
                 Button("Back") { viewModel.goBack() }
             }
             .padding()
+        }
+        .task {
+            if viewModel.slots.isEmpty {
+                await viewModel.loadSlots()
+            }
         }
     }
 }
@@ -237,7 +250,6 @@ struct BookingSummaryView: View {
                 SummaryRow(title: "Service", value: viewModel.selectedService?.name ?? "")
                 SummaryRow(title: "Artist", value: viewModel.selectedArtist?.name ?? "")
 
-                let formatter = DateFormatter()
                 SummaryRow(title: "Date", value: {
                     let f = DateFormatter()
                     f.dateStyle = .long
@@ -287,7 +299,7 @@ struct BookingSummaryView: View {
                     Spacer()
                     Text("₹\(viewModel.finalPrice, specifier: "%.0f")")
                         .font(.title2.bold())
-                        .foregroundColor(.purple)
+                        .foregroundColor(.brand)
                 }
 
                 if let error = viewModel.errorMessage {
@@ -307,7 +319,7 @@ struct BookingSummaryView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.purple)
+                .tint(.brand)
                 .disabled(viewModel.isLoading)
 
                 Button("Back") { viewModel.goBack() }

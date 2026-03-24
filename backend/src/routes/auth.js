@@ -17,6 +17,7 @@ router.post(
   '/register',
   [
     body('name').notEmpty().withMessage('Name is required'),
+    body('email').optional().isEmail().withMessage('Invalid email format'),
     body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   ],
   async (req, res, next) => {
@@ -163,7 +164,7 @@ router.post('/refresh', async (req, res, next) => {
     }
 
     const tokenDoc = await RefreshToken.findOne({ tokenHash: hashToken(token) }).populate('user');
-    if (!tokenDoc || tokenDoc.isRevoked || tokenDoc.expiresAt < new Date()) {
+    if (!tokenDoc || tokenDoc.isRevoked || tokenDoc.expiresAt < new Date() || !tokenDoc.user) {
       return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
     }
 
@@ -189,11 +190,12 @@ router.post('/logout', auth, async (req, res, next) => {
 });
 
 async function createTokens(user) {
-  const accessToken = generateAccessToken(user._id, user.email, user.role);
+  const userId = user._id || user.id;
+  const accessToken = generateAccessToken(userId, user.email, user.role);
   const refreshTokenStr = generateRefreshToken();
 
   const refreshToken = new RefreshToken({
-    user: user._id,
+    user: userId,
     tokenHash: hashToken(refreshTokenStr),
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
   });

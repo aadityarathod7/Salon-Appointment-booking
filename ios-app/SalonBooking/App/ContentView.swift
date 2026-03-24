@@ -16,38 +16,45 @@ struct ContentView: View {
 }
 
 struct MainTabView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem {
-                    Image(systemName: "house.fill")
+                    Image(systemName: selectedTab == 0 ? "house.fill" : "house")
                     Text("Home")
                 }
+                .tag(0)
 
             ServiceListView()
                 .tabItem {
                     Image(systemName: "scissors")
                     Text("Services")
                 }
+                .tag(1)
 
             AppointmentListView()
                 .tabItem {
-                    Image(systemName: "calendar")
+                    Image(systemName: selectedTab == 2 ? "calendar.circle.fill" : "calendar")
                     Text("Bookings")
                 }
+                .tag(2)
 
             NotificationListView()
                 .tabItem {
-                    Image(systemName: "bell.fill")
+                    Image(systemName: selectedTab == 3 ? "bell.fill" : "bell")
                     Text("Alerts")
                 }
+                .tag(3)
 
             ProfileView()
                 .tabItem {
-                    Image(systemName: "person.fill")
+                    Image(systemName: selectedTab == 4 ? "person.fill" : "person")
                     Text("Profile")
                 }
+                .tag(4)
         }
-        .tint(.purple)
+        .tint(.brand)
     }
 }

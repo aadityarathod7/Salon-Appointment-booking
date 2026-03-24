@@ -250,15 +250,39 @@ router.get('/appointments', async (req, res, next) => {
 router.put('/appointments/:id/status', async (req, res, next) => {
   try {
     const { status } = req.body;
-    const update = { status };
-    if (status === 'CANCELLED') {
-      update.cancelledBy = 'ADMIN';
-      update.cancelledAt = new Date();
+
+    // Validate status transition
+    const appointment = await Appointment.findById(req.params.id);
+    if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
+
+    const validTransitions = {
+      PENDING: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['IN_PROGRESS', 'CANCELLED', 'NO_SHOW'],
+      IN_PROGRESS: ['COMPLETED', 'CANCELLED', 'NO_SHOW'],
+      COMPLETED: [],
+      CANCELLED: [],
+      NO_SHOW: [],
+    };
+
+    const allowed = validTransitions[appointment.status] || [];
+    if (!allowed.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot change status from ${appointment.status} to ${status}`,
+      });
     }
-    const appointment = await Appointment.findByIdAndUpdate(req.params.id, update, { new: true })
+
+    appointment.status = status;
+    if (status === 'CANCELLED') {
+      appointment.cancelledBy = 'ADMIN';
+      appointment.cancelledAt = new Date();
+    }
+    await appointment.save();
+
+    const populated = await Appointment.findById(appointment._id)
       .populate('artist', 'name')
       .populate('service', 'name');
-    res.json(apiResponse(appointment, 'Status updated'));
+    res.json(apiResponse(populated, 'Status updated'));
   } catch (err) {
     next(err);
   }

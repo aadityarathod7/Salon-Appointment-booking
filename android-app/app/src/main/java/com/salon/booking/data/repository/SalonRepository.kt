@@ -15,21 +15,21 @@ class SalonRepository @Inject constructor(
     suspend fun getServices(category: String? = null): Result<List<SalonService>> =
         apiCall { api.getServices(category) }
 
-    suspend fun getArtistsForService(serviceId: Long): Result<List<Artist>> =
+    suspend fun getArtistsForService(serviceId: String): Result<List<Artist>> =
         apiCall { api.getArtistsForService(serviceId) }
 
     // Artists
     suspend fun getArtists(): Result<List<Artist>> =
         apiCall { api.getArtists() }
 
-    suspend fun getArtist(id: Long): Result<Artist> =
+    suspend fun getArtist(id: String): Result<Artist> =
         apiCall { api.getArtist(id) }
 
-    suspend fun getArtistReviews(id: Long): Result<PaginatedResponse<Review>> =
+    suspend fun getArtistReviews(id: String): Result<PaginatedResponse<Review>> =
         apiCall { api.getArtistReviews(id) }
 
     // Slots
-    suspend fun getAvailableSlots(artistId: Long, serviceId: Long, date: String): Result<SlotResponse> =
+    suspend fun getAvailableSlots(artistId: String, serviceId: String, date: String): Result<SlotResponse> =
         apiCall { api.getAvailableSlots(artistId, serviceId, date) }
 
     // Appointments
@@ -39,18 +39,18 @@ class SalonRepository @Inject constructor(
     suspend fun getAppointments(status: String? = null): Result<PaginatedResponse<Appointment>> =
         apiCall { api.getAppointments(status) }
 
-    suspend fun cancelAppointment(id: Long): Result<Appointment> =
+    suspend fun cancelAppointment(id: String): Result<Appointment> =
         apiCall { api.cancelAppointment(id, CancelRequest()) }
 
-    suspend fun rescheduleAppointment(id: Long, date: String, startTime: String): Result<Appointment> =
+    suspend fun rescheduleAppointment(id: String, date: String, startTime: String): Result<Appointment> =
         apiCall { api.rescheduleAppointment(id, RescheduleRequest(date, startTime)) }
 
     // Reviews
-    suspend fun createReview(appointmentId: Long, rating: Int, comment: String?): Result<Review> =
+    suspend fun createReview(appointmentId: String, rating: Int, comment: String?): Result<Review> =
         apiCall { api.createReview(ReviewRequest(appointmentId, rating, comment)) }
 
     // Coupons
-    suspend fun validateCoupon(code: String, serviceId: Long): Result<CouponValidationResponse> =
+    suspend fun validateCoupon(code: String, serviceId: String): Result<CouponValidationResponse> =
         apiCall { api.validateCoupon(ValidateCouponRequest(code, serviceId)) }
 
     // Notifications
