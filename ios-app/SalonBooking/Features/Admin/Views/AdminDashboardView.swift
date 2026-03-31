@@ -3,6 +3,8 @@ import SwiftUI
 struct AdminDashboardView: View {
     @StateObject private var vm = AdminViewModel()
     @EnvironmentObject var authManager: AuthManager
+    @State private var unreadCount = 0
+    @State private var showNotifications = false
 
     var body: some View {
         NavigationStack {
@@ -140,20 +142,60 @@ struct AdminDashboardView: View {
             .navigationTitle("Dashboard")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        authManager.logout()
-                    } label: {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .foregroundColor(.textSecondary)
+                    HStack(spacing: 16) {
+                        Button {
+                            showNotifications = true
+                        } label: {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "bell.fill")
+                                    .font(.body)
+                                    .foregroundColor(.textPrimary)
+                                if unreadCount > 0 {
+                                    Text("\(unreadCount)")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(minWidth: 16, minHeight: 16)
+                                        .background(Color.danger)
+                                        .clipShape(Circle())
+                                        .offset(x: 8, y: -6)
+                                }
+                            }
+                        }
+
+                        Button {
+                            authManager.logout()
+                        } label: {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .foregroundColor(.textSecondary)
+                        }
                     }
                 }
             }
             .refreshable {
                 await vm.loadDashboard()
+                await loadUnreadCount()
             }
             .task {
                 await vm.loadDashboard()
+                await loadUnreadCount()
             }
+            .sheet(isPresented: $showNotifications) {
+                NotificationListView()
+            }
+            .onChange(of: showNotifications) { _, isShowing in
+                if !isShowing {
+                    Task { await loadUnreadCount() }
+                }
+            }
+        }
+    }
+
+    func loadUnreadCount() async {
+        do {
+            let response: ApiResponse<PaginatedResponse<AppNotification>> = try await APIClient.shared.get("/notifications?size=100")
+            unreadCount = response.data?.content.filter { !$0.isRead }.count ?? 0
+        } catch {
+            unreadCount = 0
         }
     }
 

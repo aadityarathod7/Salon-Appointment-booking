@@ -8,6 +8,7 @@ const { Coupon } = require('../models/Coupon');
 const User = require('../models/User');
 const { auth, adminOnly } = require('../middleware/auth');
 const { apiResponse } = require('../utils/helpers');
+const { notify } = require('../services/notificationService');
 
 const router = express.Router();
 router.use(auth, adminOnly);
@@ -375,6 +376,50 @@ router.put('/appointments/:id/status', async (req, res, next) => {
     const populated = await Appointment.findById(appointment._id)
       .populate('artist', 'name')
       .populate('service', 'name');
+
+    // Notify customer about status change
+    const serviceName = populated.service?.name || 'your service';
+    const dateStr = appointment.appointmentDate?.toISOString?.()?.slice(0, 10) || '';
+    const notifMap = {
+      CONFIRMED: {
+        title: 'Booking Accepted!',
+        body: `Your booking for ${serviceName} on ${dateStr} at ${appointment.startTime} has been confirmed.`,
+        type: 'BOOKING_CONFIRMED',
+      },
+      REJECTED: {
+        title: 'Booking Rejected',
+        body: `Your booking for ${serviceName} on ${dateStr} at ${appointment.startTime} has been rejected. Please try a different slot.`,
+        type: 'BOOKING_REJECTED',
+      },
+      IN_PROGRESS: {
+        title: 'Service Started',
+        body: `Your ${serviceName} service has started. Enjoy!`,
+        type: 'BOOKING_STARTED',
+      },
+      COMPLETED: {
+        title: 'Service Completed',
+        body: `Your ${serviceName} service is done. We hope you loved it! Please leave a review.`,
+        type: 'BOOKING_COMPLETED',
+      },
+      CANCELLED: {
+        title: 'Booking Cancelled',
+        body: `Your booking for ${serviceName} on ${dateStr} at ${appointment.startTime} has been cancelled by the salon.`,
+        type: 'BOOKING_CANCELLED',
+      },
+      NO_SHOW: {
+        title: 'Missed Appointment',
+        body: `You missed your appointment for ${serviceName} on ${dateStr} at ${appointment.startTime}.`,
+        type: 'BOOKING_CANCELLED',
+      },
+    };
+
+    if (notifMap[status] && appointment.user) {
+      notify(appointment.user, {
+        ...notifMap[status],
+        referenceId: appointment._id,
+      });
+    }
+
     res.json(apiResponse(populated, 'Status updated'));
   } catch (err) {
     next(err);

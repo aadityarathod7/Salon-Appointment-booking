@@ -37,7 +37,7 @@ struct LocalImage: View {
     }
 
     var body: some View {
-        Image("\(namespace)/\(name)")
+        Image(name)
             .resizable()
             .aspectRatio(contentMode: .fill)
             .frame(width: width, height: height)

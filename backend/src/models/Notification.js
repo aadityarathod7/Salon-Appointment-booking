@@ -7,7 +7,11 @@ const notificationSchema = new mongoose.Schema(
     body: { type: String, required: true },
     type: {
       type: String,
-      enum: ['BOOKING_CONFIRMED', 'BOOKING_REMINDER', 'BOOKING_CANCELLED', 'WAITLIST_AVAILABLE', 'PROMOTION'],
+      enum: [
+        'NEW_BOOKING', 'BOOKING_CONFIRMED', 'BOOKING_REJECTED', 'BOOKING_CANCELLED',
+        'BOOKING_STARTED', 'BOOKING_COMPLETED', 'BOOKING_RESCHEDULED',
+        'BOOKING_REMINDER', 'WAITLIST_AVAILABLE', 'PROMOTION',
+      ],
       required: true,
     },
     referenceId: { type: mongoose.Schema.Types.ObjectId },

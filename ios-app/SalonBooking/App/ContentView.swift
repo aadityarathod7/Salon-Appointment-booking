@@ -21,6 +21,7 @@ struct ContentView: View {
 
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @State private var unreadCount = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -51,6 +52,7 @@ struct MainTabView: View {
                     Text("Alerts")
                 }
                 .tag(3)
+                .badge(unreadCount)
 
             ProfileView()
                 .tabItem {
@@ -60,6 +62,29 @@ struct MainTabView: View {
                 .tag(4)
         }
         .tint(.brand)
+        .task {
+            await loadUnreadCount()
+        }
+        .onChange(of: selectedTab) { _, newTab in
+            if newTab == 3 {
+                // Refresh count when leaving alerts tab
+                Task {
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    await loadUnreadCount()
+                }
+            } else {
+                Task { await loadUnreadCount() }
+            }
+        }
+    }
+
+    func loadUnreadCount() async {
+        do {
+            let response: ApiResponse<PaginatedResponse<AppNotification>> = try await APIClient.shared.get("/notifications?size=100")
+            unreadCount = response.data?.content.filter { !$0.isRead }.count ?? 0
+        } catch {
+            unreadCount = 0
+        }
     }
 }
 
@@ -96,12 +121,19 @@ struct AdminTabView: View {
                 }
                 .tag(3)
 
-            AdminReportsView()
+            NotificationListView()
                 .tabItem {
-                    Image(systemName: selectedTab == 4 ? "chart.bar.fill" : "chart.bar")
-                    Text("Reports")
+                    Image(systemName: selectedTab == 4 ? "bell.fill" : "bell")
+                    Text("Alerts")
                 }
                 .tag(4)
+
+            AdminReportsView()
+                .tabItem {
+                    Image(systemName: selectedTab == 5 ? "chart.bar.fill" : "chart.bar")
+                    Text("Reports")
+                }
+                .tag(5)
         }
         .tint(.brand)
     }

@@ -144,12 +144,6 @@ struct Review: Codable, Identifiable {
 // MARK: - Notification
 struct AppNotification: Codable, Identifiable {
     let id: String
-
-    enum CodingKeys: String, CodingKey {
-        case id = "_id"
-        case title, body, type, referenceId, isRead, sentAt
-    }
-
     let title: String
     let body: String
     let type: String

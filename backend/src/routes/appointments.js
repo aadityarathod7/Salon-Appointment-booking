@@ -6,6 +6,7 @@ const Service = require('../models/Service');
 const { Coupon, CouponUsage } = require('../models/Coupon');
 const Waitlist = require('../models/Waitlist');
 const Notification = require('../models/Notification');
+const { notify, notifyAllAdmins } = require('../services/notificationService');
 const { auth } = require('../middleware/auth');
 const { apiResponse, generateBookingRef, timeToMinutes } = require('../utils/helpers');
 
@@ -130,6 +131,22 @@ router.post('/', auth, async (req, res, next) => {
       .populate('artist', 'name phone email profileImageUrl bio experienceYears avgRating totalReviews isActive')
       .populate('service', 'name description durationMinutes price category imageUrl');
 
+    // Notify customer — booking received
+    notify(req.userId, {
+      title: 'Booking Received',
+      body: `Your booking for ${service.name} on ${date} at ${startTime} has been received. Waiting for confirmation.`,
+      type: 'NEW_BOOKING',
+      referenceId: appointment._id,
+    });
+
+    // Notify all admins — new booking
+    notifyAllAdmins({
+      title: 'New Booking',
+      body: `New booking for ${service.name} with ${artist.name} on ${date} at ${startTime}. Ref: ${bookingRef}`,
+      type: 'NEW_BOOKING',
+      referenceId: appointment._id,
+    });
+
     res.status(201).json(apiResponse(formatAppointment(populated), 'Booking created'));
   } catch (err) {
     next(err);
@@ -207,6 +224,16 @@ router.put('/:id/cancel', auth, async (req, res, next) => {
     appointment.cancelledBy = 'CUSTOMER';
     appointment.cancelledAt = new Date();
     await appointment.save();
+
+    const dateStr = appointment.appointmentDate?.toISOString?.()?.slice(0, 10) || '';
+
+    // Notify admins about cancellation
+    notifyAllAdmins({
+      title: 'Booking Cancelled',
+      body: `Booking ${appointment.bookingRef} for ${appointment.service.name} on ${dateStr} at ${appointment.startTime} was cancelled by customer.`,
+      type: 'BOOKING_CANCELLED',
+      referenceId: appointment._id,
+    });
 
     // Notify waitlisted users for this artist/date
     const startOfDay = new Date(appointment.appointmentDate);
