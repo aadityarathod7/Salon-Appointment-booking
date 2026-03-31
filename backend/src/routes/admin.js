@@ -20,7 +20,7 @@ router.get('/dashboard', async (req, res, next) => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const [todayBookings, todayRevenue, activeArtists, totalCustomers, recentBookings, peakHours] =
+    const [todayBookings, todayRevenue, activeArtists, totalCustomers, recentBookings, upcomingBookings, totalBookings, peakHours] =
       await Promise.all([
         Appointment.countDocuments({
           appointmentDate: { $gte: today, $lt: tomorrow },
@@ -43,8 +43,19 @@ router.get('/dashboard', async (req, res, next) => {
         })
           .populate('artist', 'name')
           .populate('service', 'name')
+          .populate('user', 'name phone')
           .limit(10)
           .sort({ startTime: 1 }),
+        Appointment.find({
+          appointmentDate: { $gte: today },
+          status: { $in: ['CONFIRMED', 'PENDING'] },
+        })
+          .populate('artist', 'name')
+          .populate('service', 'name')
+          .populate('user', 'name phone')
+          .limit(20)
+          .sort({ appointmentDate: 1, startTime: 1 }),
+        Appointment.countDocuments({ status: { $ne: 'CANCELLED' } }),
         Appointment.aggregate([
           {
             $match: {
@@ -70,7 +81,8 @@ router.get('/dashboard', async (req, res, next) => {
         todayRevenue: todayRevenue[0]?.total || 0,
         activeArtists,
         totalCustomers,
-        recentBookings,
+        totalBookings,
+        recentBookings: recentBookings.length > 0 ? recentBookings : upcomingBookings,
         peakHours: peakHours.map((p) => ({ hour: parseInt(p._id), bookingCount: p.count })),
       })
     );
@@ -80,6 +92,15 @@ router.get('/dashboard', async (req, res, next) => {
 });
 
 // ── Artist Management ──
+router.get('/artists', async (req, res, next) => {
+  try {
+    const artists = await Artist.find().populate('services.service', 'name price durationMinutes category').sort({ sortOrder: 1 });
+    res.json(apiResponse(artists));
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/artists', async (req, res, next) => {
   try {
     const artist = new Artist(req.body);
@@ -178,6 +199,15 @@ router.post('/artists/:id/services', async (req, res, next) => {
 });
 
 // ── Service Management ──
+router.get('/services', async (req, res, next) => {
+  try {
+    const services = await Service.find().sort({ sortOrder: 1 });
+    res.json(apiResponse(services));
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/services', async (req, res, next) => {
   try {
     const service = new Service(req.body);
@@ -202,6 +232,68 @@ router.delete('/services/:id', async (req, res, next) => {
   try {
     await Service.findByIdAndUpdate(req.params.id, { isActive: false });
     res.json(apiResponse(null, 'Service deactivated'));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── Customer Management ──
+router.get('/customers', async (req, res, next) => {
+  try {
+    const { page = 0, size = 50, search } = req.query;
+    const filter = { role: 'CUSTOMER' };
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const [customers, total] = await Promise.all([
+      User.find(filter, '-passwordHash')
+        .sort({ createdAt: -1 })
+        .skip(parseInt(page) * parseInt(size))
+        .limit(parseInt(size)),
+      User.countDocuments(filter),
+    ]);
+
+    // Get booking counts for each customer
+    const customerIds = customers.map((c) => c._id);
+    const bookingCounts = await Appointment.aggregate([
+      { $match: { user: { $in: customerIds }, status: { $ne: 'CANCELLED' } } },
+      { $group: { _id: '$user', count: { $sum: 1 }, totalSpent: { $sum: '$finalPrice' } } },
+    ]);
+    const countMap = {};
+    bookingCounts.forEach((b) => {
+      countMap[b._id.toString()] = { bookings: b.count, totalSpent: b.totalSpent };
+    });
+
+    const result = customers.map((c) => {
+      const obj = c.toObject();
+      const stats = countMap[obj._id.toString()] || { bookings: 0, totalSpent: 0 };
+      return {
+        id: obj._id,
+        name: obj.name,
+        email: obj.email,
+        phone: obj.phone,
+        profileImageUrl: obj.profileImageUrl,
+        isActive: obj.isActive,
+        createdAt: obj.createdAt,
+        totalBookings: stats.bookings,
+        totalSpent: stats.totalSpent,
+      };
+    });
+
+    res.json(
+      apiResponse({
+        content: result,
+        totalElements: total,
+        totalPages: Math.ceil(total / parseInt(size)),
+        number: parseInt(page),
+        size: parseInt(size),
+      })
+    );
   } catch (err) {
     next(err);
   }
@@ -256,11 +348,12 @@ router.put('/appointments/:id/status', async (req, res, next) => {
     if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
 
     const validTransitions = {
-      PENDING: ['CONFIRMED', 'CANCELLED'],
+      PENDING: ['CONFIRMED', 'REJECTED'],
       CONFIRMED: ['IN_PROGRESS', 'CANCELLED', 'NO_SHOW'],
       IN_PROGRESS: ['COMPLETED', 'CANCELLED', 'NO_SHOW'],
       COMPLETED: [],
       CANCELLED: [],
+      REJECTED: [],
       NO_SHOW: [],
     };
 
@@ -273,7 +366,7 @@ router.put('/appointments/:id/status', async (req, res, next) => {
     }
 
     appointment.status = status;
-    if (status === 'CANCELLED') {
+    if (status === 'CANCELLED' || status === 'REJECTED') {
       appointment.cancelledBy = 'ADMIN';
       appointment.cancelledAt = new Date();
     }

@@ -84,6 +84,15 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun loadProfile() {
+        viewModelScope.launch {
+            authRepository.getProfile().fold(
+                onSuccess = { user -> _currentUser.value = user },
+                onFailure = { /* profile load failed, default to customer */ }
+            )
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()

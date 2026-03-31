@@ -31,6 +31,13 @@
 		A10000000000000000000017 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* Theme.swift */; };
 		A10000000000000000000019 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* ImageLoader.swift */; };
 		A10000000000000000000016 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000016 /* Assets.xcassets */; };
+		A1000000000000000000001A /* AdminViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* AdminViewModel.swift */; };
+		A1000000000000000000001B /* AdminDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* AdminDashboardView.swift */; };
+		A1000000000000000000001C /* AdminAppointmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* AdminAppointmentsView.swift */; };
+		A1000000000000000000001D /* AdminArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* AdminArtistsView.swift */; };
+		A1000000000000000000001E /* AdminServicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* AdminServicesView.swift */; };
+		A1000000000000000000001F /* AdminReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* AdminReportsView.swift */; };
+		A10000000000000000000020 /* AdminCustomersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* AdminCustomersView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +66,13 @@
 		B10000000000000000000019 /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		B10000000000000000000016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10000000000000000000017 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000000000000000000001A /* AdminViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminViewModel.swift; sourceTree = "<group>"; };
+		B1000000000000000000001B /* AdminDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminDashboardView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001C /* AdminAppointmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminAppointmentsView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001D /* AdminArtistsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminArtistsView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001E /* AdminServicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminServicesView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001F /* AdminReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminReportsView.swift; sourceTree = "<group>"; };
+		B10000000000000000000020 /* AdminCustomersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminCustomersView.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* SalonBooking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SalonBooking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -167,8 +181,39 @@
 				E1000000000000000000001F /* Appointments */,
 				E10000000000000000000022 /* Profile */,
 				E10000000000000000000024 /* Notifications */,
+				E10000000000000000000040 /* Admin */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000040 /* Admin */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000041 /* ViewModels */,
+				E10000000000000000000042 /* Views */,
+			);
+			path = Admin;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000041 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000001A /* AdminViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000042 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000001B /* AdminDashboardView.swift */,
+				B1000000000000000000001C /* AdminAppointmentsView.swift */,
+				B1000000000000000000001D /* AdminArtistsView.swift */,
+				B1000000000000000000001E /* AdminServicesView.swift */,
+				B1000000000000000000001F /* AdminReportsView.swift */,
+				B10000000000000000000020 /* AdminCustomersView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		E10000000000000000000011 /* Auth */ = {
@@ -445,6 +490,13 @@
 				A10000000000000000000015 /* Components.swift in Sources */,
 				A10000000000000000000017 /* Theme.swift in Sources */,
 				A10000000000000000000019 /* ImageLoader.swift in Sources */,
+				A1000000000000000000001A /* AdminViewModel.swift in Sources */,
+				A1000000000000000000001B /* AdminDashboardView.swift in Sources */,
+				A1000000000000000000001C /* AdminAppointmentsView.swift in Sources */,
+				A1000000000000000000001D /* AdminArtistsView.swift in Sources */,
+				A1000000000000000000001E /* AdminServicesView.swift in Sources */,
+				A1000000000000000000001F /* AdminReportsView.swift in Sources */,
+				A10000000000000000000020 /* AdminCustomersView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

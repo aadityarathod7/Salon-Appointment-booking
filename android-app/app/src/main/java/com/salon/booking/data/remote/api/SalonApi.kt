@@ -101,4 +101,40 @@ interface SalonApi {
 
     @PUT("notifications/read-all")
     suspend fun markAllNotificationsRead(): ApiResponse<Unit>
+
+    // Admin
+    @GET("admin/dashboard")
+    suspend fun getAdminDashboard(): ApiResponse<AdminDashboard>
+
+    @GET("admin/appointments")
+    suspend fun getAdminAppointments(
+        @Query("date") date: String? = null,
+        @Query("status") status: String? = null,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20
+    ): ApiResponse<PaginatedResponse<AdminBooking>>
+
+    @PUT("admin/appointments/{id}/status")
+    suspend fun updateAppointmentStatus(
+        @Path("id") id: String,
+        @Body request: StatusUpdateRequest
+    ): ApiResponse<AdminBooking>
+
+    @GET("admin/artists")
+    suspend fun getAdminArtists(): ApiResponse<List<Artist>>
+
+    @GET("admin/services")
+    suspend fun getAdminServices(): ApiResponse<List<SalonService>>
+
+    @DELETE("admin/artists/{id}")
+    suspend fun deactivateArtist(@Path("id") id: String): ApiResponse<Unit>
+
+    @DELETE("admin/services/{id}")
+    suspend fun deactivateService(@Path("id") id: String): ApiResponse<Unit>
+
+    @GET("admin/reports/revenue")
+    suspend fun getRevenueReport(
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null
+    ): ApiResponse<RevenueReport>
 }

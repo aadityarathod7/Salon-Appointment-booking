@@ -138,3 +138,58 @@ data class PaginatedResponse<T>(
     val number: Int = 0,
     val size: Int = 0
 )
+
+// Admin Models
+data class AdminDashboard(
+    val todayBookings: Int = 0,
+    val todayRevenue: Double = 0.0,
+    val activeArtists: Int = 0,
+    val totalCustomers: Int = 0,
+    val recentBookings: List<AdminBooking> = emptyList(),
+    val peakHours: List<PeakHour> = emptyList()
+)
+
+data class AdminBooking(
+    @SerializedName("_id", alternate = ["id"]) val id: String = "",
+    val artist: AdminRef? = null,
+    val service: AdminRef? = null,
+    val user: AdminUserRef? = null,
+    val startTime: String = "",
+    val endTime: String = "",
+    val status: String = "",
+    val appointmentDate: String? = null,
+    val bookingRef: String? = null,
+    val originalPrice: Double? = null,
+    val finalPrice: Double? = null
+)
+
+data class AdminRef(
+    @SerializedName("_id", alternate = ["id"]) val id: String? = null,
+    val name: String? = null
+)
+
+data class AdminUserRef(
+    @SerializedName("_id", alternate = ["id"]) val id: String? = null,
+    val name: String? = null,
+    val email: String? = null,
+    val phone: String? = null
+)
+
+data class PeakHour(
+    val hour: Int = 0,
+    val bookingCount: Int = 0
+)
+
+data class RevenueReport(
+    val totalRevenue: Double = 0.0,
+    val period: String = "",
+    val breakdown: List<RevenueBreakdown> = emptyList()
+)
+
+data class RevenueBreakdown(
+    val date: String = "",
+    val revenue: Double = 0.0,
+    val bookingCount: Int = 0
+)
+
+data class StatusUpdateRequest(val status: String)

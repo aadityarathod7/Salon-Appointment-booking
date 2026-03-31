@@ -60,6 +60,7 @@ async function seed() {
       experienceYears: 8,
       sortOrder: 1,
       availability: [
+        { dayOfWeek: 0, startTime: '10:00', endTime: '18:00' },
         { dayOfWeek: 1, startTime: '09:00', endTime: '18:00' },
         { dayOfWeek: 2, startTime: '09:00', endTime: '18:00' },
         { dayOfWeek: 3, startTime: '09:00', endTime: '18:00' },
@@ -68,6 +69,7 @@ async function seed() {
         { dayOfWeek: 6, startTime: '10:00', endTime: '16:00' },
       ],
       breaks: [
+        { dayOfWeek: 0, breakStart: '13:00', breakEnd: '14:00', label: 'Lunch' },
         { dayOfWeek: 1, breakStart: '13:00', breakEnd: '14:00', label: 'Lunch' },
         { dayOfWeek: 2, breakStart: '13:00', breakEnd: '14:00', label: 'Lunch' },
         { dayOfWeek: 3, breakStart: '13:00', breakEnd: '14:00', label: 'Lunch' },
@@ -89,6 +91,7 @@ async function seed() {
       experienceYears: 5,
       sortOrder: 2,
       availability: [
+        { dayOfWeek: 0, startTime: '10:00', endTime: '17:00' },
         { dayOfWeek: 1, startTime: '10:00', endTime: '19:00' },
         { dayOfWeek: 2, startTime: '10:00', endTime: '19:00' },
         { dayOfWeek: 3, startTime: '10:00', endTime: '19:00' },
@@ -97,6 +100,7 @@ async function seed() {
         { dayOfWeek: 6, startTime: '10:00', endTime: '17:00' },
       ],
       breaks: [
+        { dayOfWeek: 0, breakStart: '13:30', breakEnd: '14:30', label: 'Lunch' },
         { dayOfWeek: 1, breakStart: '13:30', breakEnd: '14:30', label: 'Lunch' },
         { dayOfWeek: 2, breakStart: '13:30', breakEnd: '14:30', label: 'Lunch' },
         { dayOfWeek: 3, breakStart: '13:30', breakEnd: '14:30', label: 'Lunch' },
@@ -119,13 +123,16 @@ async function seed() {
       experienceYears: 6,
       sortOrder: 3,
       availability: [
+        { dayOfWeek: 0, startTime: '10:00', endTime: '16:00' },
         { dayOfWeek: 1, startTime: '09:00', endTime: '17:00' },
         { dayOfWeek: 2, startTime: '09:00', endTime: '17:00' },
         { dayOfWeek: 3, startTime: '09:00', endTime: '17:00' },
+        { dayOfWeek: 4, startTime: '09:00', endTime: '17:00' },
         { dayOfWeek: 5, startTime: '09:00', endTime: '17:00' },
         { dayOfWeek: 6, startTime: '09:00', endTime: '15:00' },
       ],
       breaks: [
+        { dayOfWeek: 0, breakStart: '12:30', breakEnd: '13:30', label: 'Lunch' },
         { dayOfWeek: 1, breakStart: '12:30', breakEnd: '13:30', label: 'Lunch' },
         { dayOfWeek: 2, breakStart: '12:30', breakEnd: '13:30', label: 'Lunch' },
         { dayOfWeek: 3, breakStart: '12:30', breakEnd: '13:30', label: 'Lunch' },

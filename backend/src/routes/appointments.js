@@ -41,7 +41,7 @@ router.post('/', auth, async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Cannot book in the past' });
     }
 
-    // Check for overlapping appointments
+    // Check for overlapping appointments (artist conflict)
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -50,7 +50,7 @@ router.post('/', auth, async (req, res, next) => {
     const existing = await Appointment.find({
       artist: artistId,
       appointmentDate: { $gte: startOfDay, $lte: endOfDay },
-      status: { $ne: 'CANCELLED' },
+      status: { $nin: ['CANCELLED', 'NO_SHOW'] },
     });
 
     const hasConflict = existing.some((apt) => {
@@ -61,6 +61,23 @@ router.post('/', auth, async (req, res, next) => {
 
     if (hasConflict) {
       return res.status(409).json({ success: false, message: 'The selected slot is no longer available' });
+    }
+
+    // Check if same user already has a booking at overlapping time (any artist)
+    const userExisting = await Appointment.find({
+      user: req.userId,
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay },
+      status: { $nin: ['CANCELLED', 'NO_SHOW'] },
+    });
+
+    const userConflict = userExisting.some((apt) => {
+      const aptStart = timeToMinutes(apt.startTime);
+      const aptEnd = timeToMinutes(apt.endTime);
+      return aptStart < endMins && aptEnd > startMins;
+    });
+
+    if (userConflict) {
+      return res.status(409).json({ success: false, message: 'You already have a booking at this time' });
     }
 
     // Apply coupon
@@ -90,7 +107,7 @@ router.post('/', auth, async (req, res, next) => {
       appointmentDate,
       startTime,
       endTime,
-      status: paymentMethod === 'PAY_AT_SALON' ? 'CONFIRMED' : 'PENDING',
+      status: 'PENDING',
       notes,
       originalPrice: price,
       finalPrice,
@@ -128,7 +145,7 @@ router.get('/', auth, async (req, res, next) => {
     if (status === 'UPCOMING') {
       filter.status = { $in: ['PENDING', 'CONFIRMED'] };
     } else if (status === 'PAST') {
-      filter.status = { $in: ['COMPLETED', 'CANCELLED', 'NO_SHOW'] };
+      filter.status = { $in: ['COMPLETED', 'CANCELLED', 'REJECTED', 'NO_SHOW'] };
     }
 
     const [appointments, total] = await Promise.all([

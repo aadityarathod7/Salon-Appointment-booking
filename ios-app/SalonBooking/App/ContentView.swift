@@ -6,7 +6,11 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                MainTabView()
+                if authManager.currentUser?.role == "ADMIN" {
+                    AdminTabView()
+                } else {
+                    MainTabView()
+                }
             } else {
                 LoginView()
             }
@@ -52,6 +56,50 @@ struct MainTabView: View {
                 .tabItem {
                     Image(systemName: selectedTab == 4 ? "person.fill" : "person")
                     Text("Profile")
+                }
+                .tag(4)
+        }
+        .tint(.brand)
+    }
+}
+
+struct AdminTabView: View {
+    @State private var selectedTab = 0
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            AdminDashboardView()
+                .tabItem {
+                    Image(systemName: selectedTab == 0 ? "square.grid.2x2.fill" : "square.grid.2x2")
+                    Text("Dashboard")
+                }
+                .tag(0)
+
+            AdminAppointmentsView()
+                .tabItem {
+                    Image(systemName: selectedTab == 1 ? "calendar.circle.fill" : "calendar")
+                    Text("Bookings")
+                }
+                .tag(1)
+
+            AdminArtistsView()
+                .tabItem {
+                    Image(systemName: selectedTab == 2 ? "person.2.fill" : "person.2")
+                    Text("Artists")
+                }
+                .tag(2)
+
+            AdminServicesView()
+                .tabItem {
+                    Image(systemName: "scissors")
+                    Text("Services")
+                }
+                .tag(3)
+
+            AdminReportsView()
+                .tabItem {
+                    Image(systemName: selectedTab == 4 ? "chart.bar.fill" : "chart.bar")
+                    Text("Reports")
                 }
                 .tag(4)
         }
