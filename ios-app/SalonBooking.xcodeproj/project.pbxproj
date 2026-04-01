@@ -38,6 +38,7 @@
 		A1000000000000000000001E /* AdminServicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* AdminServicesView.swift */; };
 		A1000000000000000000001F /* AdminReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* AdminReportsView.swift */; };
 		A10000000000000000000020 /* AdminCustomersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* AdminCustomersView.swift */; };
+		A10000000000000000000021 /* AppointmentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* AppointmentDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +74,7 @@
 		B1000000000000000000001E /* AdminServicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminServicesView.swift; sourceTree = "<group>"; };
 		B1000000000000000000001F /* AdminReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminReportsView.swift; sourceTree = "<group>"; };
 		B10000000000000000000020 /* AdminCustomersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminCustomersView.swift; sourceTree = "<group>"; };
+		B10000000000000000000021 /* AppointmentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentDetailView.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* SalonBooking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SalonBooking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -346,6 +348,7 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000012 /* AppointmentListView.swift */,
+				B10000000000000000000021 /* AppointmentDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -497,6 +500,7 @@
 				A1000000000000000000001E /* AdminServicesView.swift in Sources */,
 				A1000000000000000000001F /* AdminReportsView.swift in Sources */,
 				A10000000000000000000020 /* AdminCustomersView.swift in Sources */,
+				A10000000000000000000021 /* AppointmentDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

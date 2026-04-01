@@ -92,8 +92,23 @@ struct SelectServiceView: View {
                 viewModel.goToNext()
                 Task { await viewModel.loadArtists() }
             } label: {
-                HStack {
-                    VStack(alignment: .leading) {
+                HStack(spacing: 12) {
+                    if let img = service.imageUrl, !img.isEmpty {
+                        Image(img)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 48, height: 48)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    } else {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.brandLight.opacity(0.3))
+                            .frame(width: 48, height: 48)
+                            .overlay(
+                                Image(systemName: iconForCategory(service.category))
+                                    .foregroundColor(.brand)
+                            )
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(service.name).font(.headline)
                         Text("\(service.durationMinutes) min").font(.caption).foregroundColor(.secondary)
                     }
@@ -128,18 +143,34 @@ struct SelectArtistView: View {
                         viewModel.goToNext()
                     } label: {
                         HStack(spacing: 12) {
-                            Image(systemName: "person.circle.fill")
-                                .font(.title).foregroundColor(.brand)
-                            VStack(alignment: .leading) {
+                            if let img = artist.profileImageUrl, !img.isEmpty {
+                                Image(img)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 48, height: 48)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.brandLight.opacity(0.5))
+                                    .frame(width: 48, height: 48)
+                                    .overlay(
+                                        Text(String(artist.name.prefix(1)))
+                                            .font(.title3.weight(.bold))
+                                            .foregroundColor(.brand)
+                                    )
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(artist.name).font(.headline)
-                                HStack {
+                                HStack(spacing: 4) {
                                     RatingStarsView(rating: artist.avgRating)
-                                    Text("(\(artist.totalReviews))").font(.caption)
+                                    Text("(\(artist.totalReviews))").font(.caption).foregroundColor(.secondary)
                                 }
                             }
                             Spacer()
                             if viewModel.selectedArtist?.id == artist.id {
-                                Image(systemName: "checkmark.circle.fill").foregroundColor(.brand)
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.brand)
                             }
                         }
                     }
@@ -164,10 +195,12 @@ struct SelectDateView: View {
                 .datePickerStyle(.graphical)
                 .tint(.brand)
                 .padding()
+                .onChange(of: viewModel.selectedDate) { _, _ in
+                    Task { await viewModel.loadSlots() }
+                }
 
             Button {
                 viewModel.goToNext()
-                Task { await viewModel.loadSlots() }
             } label: {
                 Text("Continue")
                     .font(.headline)
@@ -246,9 +279,40 @@ struct BookingSummaryView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Service
-                SummaryRow(title: "Service", value: viewModel.selectedService?.name ?? "")
-                SummaryRow(title: "Artist", value: viewModel.selectedArtist?.name ?? "")
+                // Service & Artist with images
+                if let service = viewModel.selectedService {
+                    HStack(spacing: 12) {
+                        if let img = service.imageUrl, !img.isEmpty {
+                            Image(img)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 50, height: 50)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Service").font(.caption).foregroundColor(.secondary)
+                            Text(service.name).font(.headline)
+                        }
+                        Spacer()
+                    }
+                }
+
+                if let artist = viewModel.selectedArtist {
+                    HStack(spacing: 12) {
+                        if let img = artist.profileImageUrl, !img.isEmpty {
+                            Image(img)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 50, height: 50)
+                                .clipShape(Circle())
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Artist").font(.caption).foregroundColor(.secondary)
+                            Text(artist.name).font(.headline)
+                        }
+                        Spacer()
+                    }
+                }
 
                 SummaryRow(title: "Date", value: {
                     let f = DateFormatter()

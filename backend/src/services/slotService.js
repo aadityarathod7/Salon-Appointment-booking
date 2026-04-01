@@ -20,7 +20,7 @@ async function getAvailableSlots(artistId, serviceId, dateStr) {
   );
   const duration = artistService?.customDuration || service.durationMinutes;
 
-  const date = new Date(dateStr);
+  const date = new Date(dateStr + 'T00:00:00');
   const dayOfWeek = date.getDay(); // 0=Sunday
 
   // 1. Check salon timing
@@ -59,7 +59,7 @@ async function getAvailableSlots(artistId, serviceId, dateStr) {
   const existingAppointments = await Appointment.find({
     artist: artistId,
     appointmentDate: { $gte: startOfDay, $lte: endOfDay },
-    status: { $ne: 'CANCELLED' },
+    status: { $nin: ['CANCELLED', 'REJECTED', 'NO_SHOW'] },
   });
 
   // 6. Compute available windows

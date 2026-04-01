@@ -61,7 +61,12 @@ struct HomeView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 14) {
                                 ForEach(serviceVM.services) { service in
-                                    ServiceCardView(service: service)
+                                    NavigationLink {
+                                        ServiceDetailView(service: service)
+                                    } label: {
+                                        ServiceCardView(service: service)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                             .padding(.horizontal)

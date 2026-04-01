@@ -9,9 +9,16 @@ struct ProfileView: View {
                 // User info
                 Section {
                     HStack(spacing: 16) {
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.brand)
+                        Circle()
+                            .fill(
+                                LinearGradient(colors: [.brand, .brandDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            )
+                            .frame(width: 60, height: 60)
+                            .overlay(
+                                Text(String((authManager.currentUser?.name ?? "U").prefix(1)).uppercased())
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.white)
+                            )
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(authManager.currentUser?.name ?? "User")
@@ -43,7 +50,7 @@ struct ProfileView: View {
 
                 Section("Preferences") {
                     NavigationLink {
-                        Text("Notification Settings")
+                        NotificationListView()
                     } label: {
                         Label("Notifications", systemImage: "bell.fill")
                     }

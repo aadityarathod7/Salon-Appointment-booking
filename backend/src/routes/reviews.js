@@ -2,7 +2,7 @@ const express = require('express');
 const Review = require('../models/Review');
 const Appointment = require('../models/Appointment');
 const Artist = require('../models/Artist');
-const { auth } = require('../middleware/auth');
+const { auth, adminOnly } = require('../middleware/auth');
 const { apiResponse } = require('../utils/helpers');
 
 const router = express.Router();
@@ -11,6 +11,13 @@ const router = express.Router();
 router.post('/', auth, async (req, res, next) => {
   try {
     const { appointmentId, rating, comment } = req.body;
+
+    if (!appointmentId || !rating) {
+      return res.status(400).json({ success: false, message: 'appointmentId and rating are required' });
+    }
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5' });
+    }
 
     const appointment = await Appointment.findOne({ _id: appointmentId, user: req.userId });
     if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
@@ -69,6 +76,28 @@ router.put('/:id', auth, async (req, res, next) => {
   }
 });
 
+// PUT /reviews/:id/reply (admin only)
+router.put('/:id/reply', auth, adminOnly, async (req, res, next) => {
+  try {
+    const { reply } = req.body;
+    if (!reply) return res.status(400).json({ success: false, message: 'Reply is required' });
+
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+    review.adminReply = reply;
+    await review.save();
+
+    const populated = await Review.findById(review._id)
+      .populate('user', 'name profileImageUrl')
+      .populate('service', 'name');
+
+    res.json(apiResponse(formatReview(populated), 'Reply added'));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE /reviews/:id
 router.delete('/:id', auth, async (req, res, next) => {
   try {
@@ -100,12 +129,12 @@ async function updateArtistRating(artistId) {
 function formatReview(r) {
   return {
     id: r._id,
-    userName: r.user.name,
-    userProfileImage: r.user.profileImageUrl,
+    userName: r.user?.name ?? 'Deleted User',
+    userProfileImage: r.user?.profileImageUrl ?? null,
     rating: r.rating,
     comment: r.comment,
     adminReply: r.adminReply,
-    serviceName: r.service.name,
+    serviceName: r.service?.name ?? 'Unknown Service',
     createdAt: r.createdAt,
   };
 }

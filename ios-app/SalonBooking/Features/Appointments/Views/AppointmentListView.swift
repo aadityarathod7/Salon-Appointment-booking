@@ -26,9 +26,16 @@ struct AppointmentListView: View {
                     Spacer()
                 } else {
                     List(viewModel.appointments) { appointment in
-                        AppointmentCardView(appointment: appointment) {
-                            Task { await viewModel.cancelAppointment(id: appointment.id) }
+                        NavigationLink {
+                            AppointmentDetailView(appointment: appointment) {
+                                Task { await viewModel.cancelAppointment(id: appointment.id) }
+                            }
+                        } label: {
+                            AppointmentCardView(appointment: appointment) {
+                                Task { await viewModel.cancelAppointment(id: appointment.id) }
+                            }
                         }
+                        .buttonStyle(.plain)
                     }
                     .listStyle(.plain)
                 }

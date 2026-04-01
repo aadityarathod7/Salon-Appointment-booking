@@ -123,6 +123,8 @@ class BookingViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+            _slots.value = emptyList()
+            _selectedSlot.value = null
             repository.getAvailableSlots(artist.id, service.id, dateStr).fold(
                 onSuccess = { _slots.value = it.slots },
                 onFailure = { _errorMessage.value = it.message ?: "Failed to load slots" }

@@ -1,6 +1,10 @@
 package com.salon.booking.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -56,6 +60,7 @@ fun SalonNavGraph() {
     val navController = rememberNavController()
 
     val isAdmin = currentUser?.role == "ADMIN"
+    val isProfileLoading = isAuthenticated && currentUser == null
 
     // Fetch profile on login so we know the role
     LaunchedEffect(isAuthenticated) {
@@ -66,6 +71,14 @@ fun SalonNavGraph() {
 
     if (!isAuthenticated) {
         LoginScreen(authViewModel = authViewModel)
+    } else if (isProfileLoading) {
+        // Show loading while determining user role
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color(0xFF8B5E3C))
+        }
     } else if (isAdmin) {
         // Admin layout
         val adminViewModel: AdminViewModel = hiltViewModel()

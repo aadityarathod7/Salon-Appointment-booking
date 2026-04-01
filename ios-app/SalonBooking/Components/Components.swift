@@ -200,13 +200,21 @@ struct AppointmentCardView: View {
             }
 
             HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color.brandLight.opacity(0.3))
+                if let img = appointment.service.imageUrl, !img.isEmpty {
+                    Image(img)
+                        .resizable()
+                        .scaledToFill()
                         .frame(width: 44, height: 44)
-                    Image(systemName: "scissors")
-                        .font(.body)
-                        .foregroundColor(.brand)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.brandLight.opacity(0.3))
+                            .frame(width: 44, height: 44)
+                        Image(systemName: "scissors")
+                            .font(.body)
+                            .foregroundColor(.brand)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 3) {

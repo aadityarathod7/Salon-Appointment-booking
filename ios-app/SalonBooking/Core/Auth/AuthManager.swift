@@ -118,6 +118,13 @@ class AuthManager: ObservableObject {
     }
 
     func logout() {
+        // Revoke tokens on backend
+        Task {
+            do {
+                struct Empty: Codable {}
+                let _: ApiResponse<String> = try await APIClient.shared.post("/auth/logout", body: Empty())
+            } catch {}
+        }
         TokenManager.shared.clearTokens()
         currentUser = nil
         isAuthenticated = false

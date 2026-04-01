@@ -28,7 +28,7 @@ router.post('/', auth, async (req, res, next) => {
     }
 
     // Get duration (check custom)
-    const artistService = artist.services.find((s) => s.service.toString() === serviceId);
+    const artistService = artist.services?.find((s) => s.service.toString() === serviceId);
     const duration = artistService?.customDuration || service.durationMinutes;
     const price = artistService?.customPrice || service.price;
 
@@ -37,8 +37,10 @@ router.post('/', auth, async (req, res, next) => {
     const endTime = `${String(Math.floor(endMins / 60)).padStart(2, '0')}:${String(endMins % 60).padStart(2, '0')}`;
 
     // Validate date not in past
-    const appointmentDate = new Date(date);
-    if (appointmentDate < new Date().setHours(0, 0, 0, 0)) {
+    const appointmentDate = new Date(date + 'T00:00:00');
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (appointmentDate < todayStart) {
       return res.status(400).json({ success: false, message: 'Cannot book in the past' });
     }
 
@@ -273,9 +275,15 @@ router.put('/:id/reschedule', auth, async (req, res, next) => {
   try {
     const { date, startTime } = req.body;
 
+    if (!date || !startTime) {
+      return res.status(400).json({ success: false, message: 'Date and startTime are required' });
+    }
+
     // Validate date not in past
-    const newDate = new Date(date);
-    if (newDate < new Date().setHours(0, 0, 0, 0)) {
+    const newDate = new Date(date + 'T00:00:00');
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (newDate < todayStart) {
       return res.status(400).json({ success: false, message: 'Cannot reschedule to a past date' });
     }
 

@@ -49,6 +49,8 @@ class BookingViewModel: ObservableObject {
     func loadSlots() async {
         guard let service = selectedService, let artist = selectedArtist else { return }
         isLoading = true
+        slots = []
+        selectedSlot = nil
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
