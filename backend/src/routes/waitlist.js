@@ -8,19 +8,27 @@ const router = express.Router();
 // POST /waitlist
 router.post('/', auth, async (req, res, next) => {
   try {
-    const { artistId, serviceId, preferredDate, preferredTimeStart, preferredTimeEnd } = req.body;
+    const { artistId, serviceId, preferredDate, preferredTime, notes } = req.body;
+
+    if (!artistId || !serviceId || !preferredDate) {
+      return res.status(400).json({ success: false, message: 'artistId, serviceId, and preferredDate are required' });
+    }
 
     const entry = new Waitlist({
       user: req.userId,
       artist: artistId,
       service: serviceId,
-      preferredDate: new Date(preferredDate),
-      preferredTimeStart,
-      preferredTimeEnd,
+      preferredDate: new Date(preferredDate + 'T00:00:00'),
+      preferredTimeStart: preferredTime,
+      notes,
     });
     await entry.save();
 
-    res.status(201).json(apiResponse(entry, 'Added to waitlist'));
+    const populated = await Waitlist.findById(entry._id)
+      .populate('artist', 'name')
+      .populate('service', 'name');
+
+    res.status(201).json(apiResponse(populated, 'Added to waitlist'));
   } catch (err) {
     next(err);
   }
@@ -34,16 +42,7 @@ router.get('/', auth, async (req, res, next) => {
       .populate('service', 'name')
       .sort({ createdAt: -1 });
 
-    const formatted = entries.map((e) => ({
-      id: e._id,
-      artistName: e.artist.name,
-      serviceName: e.service.name,
-      preferredDate: e.preferredDate.toISOString().slice(0, 10),
-      status: e.status,
-      createdAt: e.createdAt,
-    }));
-
-    res.json(apiResponse(formatted));
+    res.json(apiResponse(entries));
   } catch (err) {
     next(err);
   }

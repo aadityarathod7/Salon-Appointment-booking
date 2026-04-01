@@ -39,6 +39,14 @@
 		A1000000000000000000001F /* AdminReportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* AdminReportsView.swift */; };
 		A10000000000000000000020 /* AdminCustomersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* AdminCustomersView.swift */; };
 		A10000000000000000000021 /* AppointmentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* AppointmentDetailView.swift */; };
+		A10000000000000000000022 /* ReviewViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* ReviewViews.swift */; };
+		A10000000000000000000023 /* RescheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* RescheduleView.swift */; };
+		A10000000000000000000024 /* AdminForms.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* AdminForms.swift */; };
+		A10000000000000000000025 /* AddressListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* AddressListView.swift */; };
+		A10000000000000000000026 /* CouponListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* CouponListView.swift */; };
+		A10000000000000000000027 /* WaitlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* WaitlistView.swift */; };
+		A10000000000000000000028 /* AdminCouponsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000028 /* AdminCouponsView.swift */; };
+		A10000000000000000000029 /* AdminArtistLeaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000029 /* AdminArtistLeaveView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +83,14 @@
 		B1000000000000000000001F /* AdminReportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminReportsView.swift; sourceTree = "<group>"; };
 		B10000000000000000000020 /* AdminCustomersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminCustomersView.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* AppointmentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppointmentDetailView.swift; sourceTree = "<group>"; };
+		B10000000000000000000022 /* ReviewViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewViews.swift; sourceTree = "<group>"; };
+		B10000000000000000000023 /* RescheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RescheduleView.swift; sourceTree = "<group>"; };
+		B10000000000000000000024 /* AdminForms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminForms.swift; sourceTree = "<group>"; };
+		B10000000000000000000025 /* AddressListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressListView.swift; sourceTree = "<group>"; };
+		B10000000000000000000026 /* CouponListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CouponListView.swift; sourceTree = "<group>"; };
+		B10000000000000000000027 /* WaitlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitlistView.swift; sourceTree = "<group>"; };
+		B10000000000000000000028 /* AdminCouponsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminCouponsView.swift; sourceTree = "<group>"; };
+		B10000000000000000000029 /* AdminArtistLeaveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminArtistLeaveView.swift; sourceTree = "<group>"; };
 		C10000000000000000000001 /* SalonBooking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SalonBooking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -183,9 +199,77 @@
 				E1000000000000000000001F /* Appointments */,
 				E10000000000000000000022 /* Profile */,
 				E10000000000000000000024 /* Notifications */,
+				E10000000000000000000050 /* Reviews */,
+				E10000000000000000000060 /* Addresses */,
+				E10000000000000000000062 /* Coupons */,
+				E10000000000000000000064 /* Waitlist */,
 				E10000000000000000000040 /* Admin */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000050 /* Reviews */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000051 /* Views */,
+			);
+			path = Reviews;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000051 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000022 /* ReviewViews.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000060 /* Addresses */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000061 /* Views */,
+			);
+			path = Addresses;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000061 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000025 /* AddressListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000062 /* Coupons */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000063 /* Views */,
+			);
+			path = Coupons;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000063 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000026 /* CouponListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000064 /* Waitlist */ = {
+			isa = PBXGroup;
+			children = (
+				E10000000000000000000065 /* Views */,
+			);
+			path = Waitlist;
+			sourceTree = "<group>";
+		};
+		E10000000000000000000065 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000027 /* WaitlistView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		E10000000000000000000040 /* Admin */ = {
@@ -214,6 +298,9 @@
 				B1000000000000000000001E /* AdminServicesView.swift */,
 				B1000000000000000000001F /* AdminReportsView.swift */,
 				B10000000000000000000020 /* AdminCustomersView.swift */,
+				B10000000000000000000024 /* AdminForms.swift */,
+				B10000000000000000000028 /* AdminCouponsView.swift */,
+				B10000000000000000000029 /* AdminArtistLeaveView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -349,6 +436,7 @@
 			children = (
 				B10000000000000000000012 /* AppointmentListView.swift */,
 				B10000000000000000000021 /* AppointmentDetailView.swift */,
+				B10000000000000000000023 /* RescheduleView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -501,6 +589,14 @@
 				A1000000000000000000001F /* AdminReportsView.swift in Sources */,
 				A10000000000000000000020 /* AdminCustomersView.swift in Sources */,
 				A10000000000000000000021 /* AppointmentDetailView.swift in Sources */,
+				A10000000000000000000022 /* ReviewViews.swift in Sources */,
+				A10000000000000000000023 /* RescheduleView.swift in Sources */,
+				A10000000000000000000024 /* AdminForms.swift in Sources */,
+				A10000000000000000000025 /* AddressListView.swift in Sources */,
+				A10000000000000000000026 /* CouponListView.swift in Sources */,
+				A10000000000000000000027 /* WaitlistView.swift in Sources */,
+				A10000000000000000000028 /* AdminCouponsView.swift in Sources */,
+				A10000000000000000000029 /* AdminArtistLeaveView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

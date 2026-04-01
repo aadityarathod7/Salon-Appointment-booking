@@ -193,3 +193,46 @@ data class RevenueBreakdown(
 )
 
 data class StatusUpdateRequest(val status: String)
+
+data class SavedAddress(
+    @SerializedName("_id", alternate = ["id"]) val id: String = "",
+    val label: String? = null,
+    val addressLine1: String = "",
+    val addressLine2: String? = null,
+    val city: String = "",
+    val state: String = "",
+    val pincode: String = "",
+    val isDefault: Boolean? = false
+)
+
+data class CouponItem(
+    @SerializedName("_id", alternate = ["id"]) val id: String = "",
+    val code: String = "",
+    val description: String? = null,
+    val discountType: String = "",
+    val discountValue: Double = 0.0,
+    val maxDiscount: Double? = null,
+    val minOrderAmount: Double? = null,
+    val validUntil: String? = null
+)
+
+data class WaitlistEntry(
+    @SerializedName("_id", alternate = ["id"]) val id: String = "",
+    val artist: AdminRef? = null,
+    val service: AdminRef? = null,
+    val preferredDate: String? = null,
+    val preferredTime: String? = null,
+    val status: String = "",
+    val notifiedAt: String? = null,
+    val notes: String? = null
+)
+
+data class AddAddressRequest(
+    val label: String, val addressLine1: String, val addressLine2: String?,
+    val city: String, val state: String, val pincode: String, val isDefault: Boolean
+)
+
+data class JoinWaitlistRequest(
+    val artistId: String, val serviceId: String, val preferredDate: String,
+    val preferredTime: String? = null, val notes: String? = null
+)

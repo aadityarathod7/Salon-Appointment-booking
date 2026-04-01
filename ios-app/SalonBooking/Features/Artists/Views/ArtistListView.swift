@@ -77,6 +77,16 @@ struct ArtistDetailView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.brand)
                 .padding(.horizontal)
+
+                // Reviews section
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Reviews")
+                        .font(.system(size: 18, weight: .bold, design: .serif))
+                        .padding(.horizontal)
+
+                    ReviewsListView(artistId: artist.id)
+                        .padding(.horizontal)
+                }
             }
             .padding(.vertical)
         }

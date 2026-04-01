@@ -157,6 +157,17 @@ router.put('/artists/:id/breaks', async (req, res, next) => {
   }
 });
 
+// Get artist leaves
+router.get('/artists/:id/leaves', async (req, res, next) => {
+  try {
+    const leaves = await ArtistLeave.find({ artist: req.params.id })
+      .sort({ leaveDate: 1 });
+    res.json(apiResponse(leaves));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Add artist leave
 router.post('/artists/:id/leaves', async (req, res, next) => {
   try {

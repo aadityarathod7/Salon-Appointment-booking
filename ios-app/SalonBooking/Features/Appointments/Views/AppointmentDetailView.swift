@@ -4,6 +4,8 @@ struct AppointmentDetailView: View {
     let appointment: Appointment
     let onCancel: () -> Void
     @Environment(\.dismiss) var dismiss
+    @State private var showReview = false
+    @State private var showReschedule = false
 
     var statusColor: Color {
         switch appointment.status {
@@ -152,19 +154,49 @@ struct AppointmentDetailView: View {
                         }
                     }
 
-                    // Cancel button
+                    // Action buttons
                     if appointment.status == "PENDING" || appointment.status == "CONFIRMED" {
-                        Button(role: .destructive) {
-                            onCancel()
-                            dismiss()
+                        VStack(spacing: 10) {
+                            Button {
+                                showReschedule = true
+                            } label: {
+                                Text("Reschedule")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.brand)
+
+                            Button(role: .destructive) {
+                                onCancel()
+                                dismiss()
+                            } label: {
+                                Text("Cancel Appointment")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.danger)
+                        }
+                    }
+
+                    // Review button for completed
+                    if appointment.status == "COMPLETED" {
+                        Button {
+                            showReview = true
                         } label: {
-                            Text("Cancel Appointment")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                            HStack {
+                                Image(systemName: "star.fill")
+                                Text("Write a Review")
+                            }
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(.danger)
+                        .tint(.brand)
                     }
                 }
                 .padding()
@@ -172,5 +204,11 @@ struct AppointmentDetailView: View {
         }
         .background(Color.surfaceBg)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showReview) {
+            WriteReviewView(appointment: appointment) { }
+        }
+        .sheet(isPresented: $showReschedule) {
+            RescheduleView(appointment: appointment) { dismiss() }
+        }
     }
 }

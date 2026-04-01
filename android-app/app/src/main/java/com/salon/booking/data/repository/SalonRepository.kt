@@ -60,6 +60,30 @@ class SalonRepository @Inject constructor(
     suspend fun markAllNotificationsRead(): Result<Unit> =
         apiCall { api.markAllNotificationsRead() }
 
+    // Addresses
+    suspend fun getAddresses(): Result<List<SavedAddress>> =
+        apiCall { api.getAddresses() }
+
+    suspend fun addAddress(request: AddAddressRequest): Result<SavedAddress> =
+        apiCall { api.addAddress(request) }
+
+    suspend fun deleteAddress(id: String): Result<Unit> =
+        apiCall { api.deleteAddress(id) }
+
+    // Coupons
+    suspend fun getCoupons(): Result<List<CouponItem>> =
+        apiCall { api.getCoupons() }
+
+    // Waitlist
+    suspend fun getWaitlist(): Result<List<WaitlistEntry>> =
+        apiCall { api.getWaitlist() }
+
+    suspend fun joinWaitlist(request: JoinWaitlistRequest): Result<WaitlistEntry> =
+        apiCall { api.joinWaitlist(request) }
+
+    suspend fun leaveWaitlist(id: String): Result<Unit> =
+        apiCall { api.leaveWaitlist(id) }
+
     private suspend fun <T> apiCall(call: suspend () -> com.salon.booking.data.remote.dto.ApiResponse<T>): Result<T> {
         return try {
             val response = call()

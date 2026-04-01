@@ -140,4 +140,28 @@ interface SalonApi {
         @Query("startDate") startDate: String? = null,
         @Query("endDate") endDate: String? = null
     ): ApiResponse<RevenueReport>
+
+    // Addresses
+    @GET("addresses")
+    suspend fun getAddresses(): ApiResponse<List<SavedAddress>>
+
+    @POST("addresses")
+    suspend fun addAddress(@Body request: AddAddressRequest): ApiResponse<SavedAddress>
+
+    @DELETE("addresses/{id}")
+    suspend fun deleteAddress(@Path("id") id: String): ApiResponse<Unit>
+
+    // Coupons listing
+    @GET("coupons")
+    suspend fun getCoupons(): ApiResponse<List<CouponItem>>
+
+    // Waitlist
+    @GET("waitlist")
+    suspend fun getWaitlist(): ApiResponse<List<WaitlistEntry>>
+
+    @POST("waitlist")
+    suspend fun joinWaitlist(@Body request: JoinWaitlistRequest): ApiResponse<WaitlistEntry>
+
+    @DELETE("waitlist/{id}")
+    suspend fun leaveWaitlist(@Path("id") id: String): ApiResponse<Unit>
 }

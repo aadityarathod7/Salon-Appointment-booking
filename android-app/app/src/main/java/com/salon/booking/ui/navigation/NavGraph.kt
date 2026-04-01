@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.salon.booking.ui.admin.*
 import com.salon.booking.ui.appointments.AppointmentListScreen
+import com.salon.booking.ui.artists.ArtistDetailScreen
 import com.salon.booking.ui.auth.AuthViewModel
 import com.salon.booking.ui.auth.LoginScreen
 import com.salon.booking.ui.booking.BookingFlowScreen
@@ -33,6 +34,7 @@ sealed class Screen(val route: String, val title: String, val icon: @Composable 
     data object Profile : Screen("profile", "Profile", { Icon(Icons.Filled.Person, contentDescription = "Profile") })
     data object Login : Screen("login", "Login", {})
     data object BookingFlow : Screen("booking_flow", "Book", {})
+    data object ArtistDetail : Screen("artist_detail/{id}", "Artist", {})
 
     // Admin screens
     data object AdminDashboard : Screen("admin_dashboard", "Dashboard", { Icon(Icons.Filled.Dashboard, contentDescription = "Dashboard") })
@@ -135,7 +137,9 @@ fun SalonNavGraph() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
 
-                if (currentRoute != Screen.BookingFlow.route) {
+                val hideBottomBar = currentRoute == Screen.BookingFlow.route ||
+                        currentRoute?.startsWith("artist_detail") == true
+                if (!hideBottomBar) {
                     NavigationBar {
                         bottomNavItems.forEach { screen ->
                             NavigationBarItem(
@@ -161,13 +165,18 @@ fun SalonNavGraph() {
                 modifier = Modifier.padding(padding)
             ) {
                 composable(Screen.Home.route) {
-                    HomeScreen(onBookClick = { navController.navigate(Screen.BookingFlow.route) })
+                    HomeScreen(
+                        onBookClick = { navController.navigate(Screen.BookingFlow.route) },
+                        onArtistClick = { artistId -> navController.navigate("artist_detail/$artistId") }
+                    )
                 }
                 composable(Screen.Services.route) {
                     ServiceListScreen(onBookClick = { navController.navigate(Screen.BookingFlow.route) })
                 }
                 composable(Screen.Bookings.route) {
-                    AppointmentListScreen()
+                    AppointmentListScreen(
+                        onBookAgain = { navController.navigate(Screen.BookingFlow.route) }
+                    )
                 }
                 composable(Screen.Notifications.route) {
                     NotificationScreen()
@@ -193,6 +202,14 @@ fun SalonNavGraph() {
                 }
                 composable(Screen.BookingFlow.route) {
                     BookingFlowScreen(onDone = { navController.popBackStack() })
+                }
+                composable("artist_detail/{id}") { backStackEntry ->
+                    val artistId = backStackEntry.arguments?.getString("id") ?: ""
+                    ArtistDetailScreen(
+                        artistId = artistId,
+                        onBack = { navController.popBackStack() },
+                        onBookClick = { navController.navigate(Screen.BookingFlow.route) }
+                    )
                 }
             }
         }

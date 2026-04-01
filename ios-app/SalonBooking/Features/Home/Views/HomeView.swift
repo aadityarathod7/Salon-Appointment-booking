@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject var authManager: AuthManager
     @StateObject private var serviceVM = ServiceViewModel()
     @StateObject private var artistVM = ArtistViewModel()
     @State private var showBookingFlow = false
+    @State private var selectedTab = 0
 
     var body: some View {
         NavigationStack {
@@ -20,7 +22,7 @@ struct HomeView: View {
                         .cornerRadius(20)
 
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Hello, Beautiful!")
+                            Text("Hello, \(authManager.currentUser?.name ?? "Beautiful")!")
                                 .font(.system(size: 26, weight: .bold, design: .serif))
                                 .foregroundColor(.white)
                             Text("Ready for your next glow-up?")
@@ -55,6 +57,13 @@ struct HomeView: View {
                                 .font(.system(size: 20, weight: .bold, design: .serif))
                                 .foregroundColor(.textPrimary)
                             Spacer()
+                            NavigationLink {
+                                ServiceListView()
+                            } label: {
+                                Text("See All")
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundColor(.brand)
+                            }
                         }
                         .padding(.horizontal)
 
@@ -75,10 +84,13 @@ struct HomeView: View {
 
                     // Artists Section
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Top Artists")
-                            .font(.system(size: 20, weight: .bold, design: .serif))
-                            .foregroundColor(.textPrimary)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("Top Artists")
+                                .font(.system(size: 20, weight: .bold, design: .serif))
+                                .foregroundColor(.textPrimary)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
 
                         ForEach(artistVM.artists) { artist in
                             NavigationLink {
@@ -90,6 +102,37 @@ struct HomeView: View {
                         }
                         .padding(.horizontal)
                     }
+
+                    // Salon Info
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("About Us")
+                            .font(.system(size: 20, weight: .bold, design: .serif))
+                            .foregroundColor(.textPrimary)
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Glamour Salon & Spa", systemImage: "building.2.fill")
+                                .font(.headline)
+                                .foregroundColor(.textPrimary)
+
+                            Label("123, MG Road, Bengaluru, Karnataka 560001", systemImage: "mappin.and.ellipse")
+                                .font(.caption)
+                                .foregroundColor(.textSecondary)
+
+                            Label("+91 98765 43210", systemImage: "phone.fill")
+                                .font(.caption)
+                                .foregroundColor(.textSecondary)
+
+                            Label("Open: Mon-Sat 9AM-9PM, Sun 10AM-8PM", systemImage: "clock.fill")
+                                .font(.caption)
+                                .foregroundColor(.textSecondary)
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(.white)
+                        .cornerRadius(16)
+                        .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
+                    }
+                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }

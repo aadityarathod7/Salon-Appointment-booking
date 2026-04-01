@@ -5,6 +5,33 @@ const { apiResponse } = require('../utils/helpers');
 
 const router = express.Router();
 
+// GET /coupons - list active coupons for customers
+router.get('/', auth, async (req, res, next) => {
+  try {
+    const now = new Date();
+    const coupons = await Coupon.find({
+      isActive: true,
+      validFrom: { $lte: now },
+      validUntil: { $gte: now },
+    }).sort({ createdAt: -1 });
+
+    const formatted = coupons.map((c) => ({
+      id: c._id,
+      code: c.code,
+      description: c.description,
+      discountType: c.discountType,
+      discountValue: c.discountValue,
+      maxDiscount: c.maxDiscount,
+      minOrderAmount: c.minOrderAmount,
+      validUntil: c.validUntil,
+    }));
+
+    res.json(apiResponse(formatted));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /coupons/validate
 router.post('/validate', auth, async (req, res, next) => {
   try {

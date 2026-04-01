@@ -162,6 +162,13 @@ struct AdminDashboardView: View {
                             }
                         }
 
+                        NavigationLink {
+                            SalonTimingsView()
+                        } label: {
+                            Image(systemName: "gearshape.fill")
+                                .foregroundColor(.textPrimary)
+                        }
+
                         Button {
                             authManager.logout()
                         } label: {

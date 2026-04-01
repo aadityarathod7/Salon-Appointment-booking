@@ -183,6 +183,9 @@ struct ArtistCardView: View {
 struct AppointmentCardView: View {
     let appointment: Appointment
     let onCancel: () -> Void
+    @State private var showReview = false
+    @State private var showReschedule = false
+    @State private var showBookAgain = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -252,16 +255,65 @@ struct AppointmentCardView: View {
                 Spacer()
 
                 if appointment.status == "CONFIRMED" || appointment.status == "PENDING" {
+                    HStack(spacing: 8) {
+                        Button {
+                            showReschedule = true
+                        } label: {
+                            Text("Reschedule")
+                                .font(.caption.bold())
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 7)
+                                .background(Color.brand.opacity(0.1))
+                                .foregroundColor(.brand)
+                                .cornerRadius(8)
+                        }
+                        Button {
+                            onCancel()
+                        } label: {
+                            Text("Cancel")
+                                .font(.caption.bold())
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 7)
+                                .background(Color.danger.opacity(0.1))
+                                .foregroundColor(.danger)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+
+                if appointment.status == "COMPLETED" {
                     Button {
-                        onCancel()
+                        showReview = true
                     } label: {
-                        Text("Cancel")
-                            .font(.caption.bold())
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 7)
-                            .background(Color.danger.opacity(0.1))
-                            .foregroundColor(.danger)
-                            .cornerRadius(8)
+                        HStack(spacing: 4) {
+                            Image(systemName: "star.fill")
+                                .font(.caption2)
+                            Text("Review")
+                        }
+                        .font(.caption.bold())
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(Color.warning.opacity(0.15))
+                        .foregroundColor(.warning)
+                        .cornerRadius(8)
+                    }
+                }
+
+                if appointment.status == "COMPLETED" || appointment.status == "CANCELLED" || appointment.status == "REJECTED" {
+                    Button {
+                        showBookAgain = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.caption2)
+                            Text("Book Again")
+                        }
+                        .font(.caption.bold())
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(Color.success.opacity(0.1))
+                        .foregroundColor(.success)
+                        .cornerRadius(8)
                     }
                 }
             }
@@ -270,6 +322,23 @@ struct AppointmentCardView: View {
         .background(.white)
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.04), radius: 8, y: 3)
+        .sheet(isPresented: $showReview) {
+            WriteReviewView(appointment: appointment) { }
+        }
+        .sheet(isPresented: $showReschedule) {
+            RescheduleView(appointment: appointment) { }
+        }
+        .fullScreenCover(isPresented: $showBookAgain) {
+            BookingFlowView(preselectedService: SalonService(
+                id: appointment.service.id,
+                name: appointment.service.name,
+                description: appointment.service.description,
+                durationMinutes: appointment.service.durationMinutes ?? 30,
+                price: appointment.service.price ?? 0,
+                category: appointment.service.category,
+                imageUrl: appointment.service.imageUrl
+            ))
+        }
     }
 }
 

@@ -46,6 +46,26 @@ struct ProfileView: View {
                     } label: {
                         Label("My Appointments", systemImage: "calendar")
                     }
+
+                    NavigationLink {
+                        AddressListView()
+                    } label: {
+                        Label("Saved Addresses", systemImage: "mappin.circle.fill")
+                    }
+                }
+
+                Section("Offers") {
+                    NavigationLink {
+                        CouponListView()
+                    } label: {
+                        Label("Available Coupons", systemImage: "ticket.fill")
+                    }
+
+                    NavigationLink {
+                        WaitlistView()
+                    } label: {
+                        Label("My Waitlist", systemImage: "clock.badge.questionmark")
+                    }
                 }
 
                 Section("Preferences") {

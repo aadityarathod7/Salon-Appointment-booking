@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AdminArtistsView: View {
     @StateObject private var vm = AdminViewModel()
+    @State private var showAddArtist = false
 
     var body: some View {
         NavigationStack {
@@ -17,6 +18,19 @@ struct AdminArtistsView: View {
             }
             .background(Color.surfaceBg)
             .navigationTitle("Artists")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddArtist = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.brand)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddArtist) {
+                AddArtistView { Task { await vm.loadArtists() } }
+            }
             .overlay {
                 if vm.artists.isEmpty && !vm.isLoading {
                     VStack(spacing: 12) {
@@ -43,6 +57,8 @@ struct AdminArtistCard: View {
     let artist: Artist
     let onDelete: () -> Void
     @State private var showDeleteConfirm = false
+    @State private var showEdit = false
+    @State private var showLeaves = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -121,6 +137,20 @@ struct AdminArtistCard: View {
 
             // Actions
             HStack {
+                Button {
+                    showEdit = true
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.brand)
+                }
+                Button {
+                    showLeaves = true
+                } label: {
+                    Label("Leaves", systemImage: "calendar.badge.minus")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.accent)
+                }
                 Spacer()
                 Button(role: .destructive) {
                     showDeleteConfirm = true
@@ -138,6 +168,12 @@ struct AdminArtistCard: View {
         .confirmationDialog("Deactivate \(artist.name)?", isPresented: $showDeleteConfirm) {
             Button("Deactivate", role: .destructive) { onDelete() }
             Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showEdit) {
+            EditArtistView(artist: artist) { onDelete() }
+        }
+        .sheet(isPresented: $showLeaves) {
+            AdminArtistLeaveView(artistId: artist.id, artistName: artist.name)
         }
     }
 }

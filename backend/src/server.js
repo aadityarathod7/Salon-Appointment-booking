@@ -14,6 +14,7 @@ const reviewRoutes = require('./routes/reviews');
 const couponRoutes = require('./routes/coupons');
 const waitlistRoutes = require('./routes/waitlist');
 const notificationRoutes = require('./routes/notifications');
+const addressRoutes = require('./routes/addresses');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/coupons', couponRoutes);
 app.use('/api/v1/waitlist', waitlistRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/addresses', addressRoutes);
 app.use('/api/v1/admin', adminRoutes);
 
 // Health check

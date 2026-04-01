@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AdminServicesView: View {
     @StateObject private var vm = AdminViewModel()
+    @State private var showAddService = false
 
     var body: some View {
         NavigationStack {
@@ -17,6 +18,19 @@ struct AdminServicesView: View {
             }
             .background(Color.surfaceBg)
             .navigationTitle("Services")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showAddService = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.brand)
+                    }
+                }
+            }
+            .sheet(isPresented: $showAddService) {
+                AddServiceView { Task { await vm.loadServices() } }
+            }
             .overlay {
                 if vm.services.isEmpty && !vm.isLoading {
                     VStack(spacing: 12) {
@@ -43,6 +57,7 @@ struct AdminServiceCard: View {
     let service: SalonService
     let onDelete: () -> Void
     @State private var showDeleteConfirm = false
+    @State private var showEdit = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -86,12 +101,21 @@ struct AdminServiceCard: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundColor(.brand)
 
-                Button(role: .destructive) {
-                    showDeleteConfirm = true
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.caption)
-                        .foregroundColor(.danger)
+                VStack(spacing: 8) {
+                    Button {
+                        showEdit = true
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                            .foregroundColor(.brand)
+                    }
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                            .foregroundColor(.danger)
+                    }
                 }
             }
         }
@@ -99,6 +123,9 @@ struct AdminServiceCard: View {
         .background(.white)
         .cornerRadius(14)
         .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
+        .sheet(isPresented: $showEdit) {
+            EditServiceView(service: service) { onDelete() }
+        }
         .confirmationDialog("Deactivate \(service.name)?", isPresented: $showDeleteConfirm) {
             Button("Deactivate", role: .destructive) { onDelete() }
             Button("Cancel", role: .cancel) {}
