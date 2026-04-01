@@ -43,6 +43,16 @@ router.get('/', auth, async (req, res, next) => {
   }
 });
 
+// PUT /notifications/read-all (must be before /:id/read)
+router.put('/read-all', auth, async (req, res, next) => {
+  try {
+    await Notification.updateMany({ user: req.userId, isRead: false }, { isRead: true });
+    res.json(apiResponse(null, 'All notifications marked as read'));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // PUT /notifications/:id/read
 router.put('/:id/read', auth, async (req, res, next) => {
   try {
@@ -51,16 +61,6 @@ router.put('/:id/read', auth, async (req, res, next) => {
       { isRead: true }
     );
     res.json(apiResponse(null, 'Notification marked as read'));
-  } catch (err) {
-    next(err);
-  }
-});
-
-// PUT /notifications/read-all
-router.put('/read-all', auth, async (req, res, next) => {
-  try {
-    await Notification.updateMany({ user: req.userId, isRead: false }, { isRead: true });
-    res.json(apiResponse(null, 'All notifications marked as read'));
   } catch (err) {
     next(err);
   }

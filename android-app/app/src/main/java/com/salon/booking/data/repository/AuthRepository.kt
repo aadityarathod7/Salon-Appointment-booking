@@ -80,6 +80,23 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    suspend fun updateProfile(name: String, email: String, phone: String): Result<User> {
+        return try {
+            val response = api.updateProfile(UpdateProfileRequest(
+                name = name.ifBlank { null },
+                email = email.ifBlank { null },
+                phone = phone.ifBlank { null }
+            ))
+            if (response.success && response.data != null) {
+                Result.success(response.data)
+            } else {
+                Result.failure(Exception(response.message ?: "Update failed"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun logout() {
         try { api.logout() } catch (_: Exception) {}
         tokenStore.clearTokens()

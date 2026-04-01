@@ -16,9 +16,15 @@ import com.salon.booking.ui.auth.AuthViewModel
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
+    onNavigateToBookings: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val user by authViewModel.currentUser.collectAsState()
+    var showEditDialog by remember { mutableStateOf(false) }
+    var editName by remember { mutableStateOf("") }
+    var editEmail by remember { mutableStateOf("") }
+    var editPhone by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Profile") }) }
@@ -32,12 +38,21 @@ fun ProfileScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Filled.AccountCircle,
-                        contentDescription = null,
+                    // Avatar with initials
+                    Surface(
                         modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                        color = MaterialTheme.colorScheme.primary
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                (user?.name ?: "U").take(1).uppercase(),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(user?.name ?: "User", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -52,11 +67,20 @@ fun ProfileScreen(
             // Menu items
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column {
-                    ProfileMenuItem(Icons.Filled.Person, "Edit Profile") { }
+                    ProfileMenuItem(Icons.Filled.Person, "Edit Profile") {
+                        editName = user?.name ?: ""
+                        editEmail = user?.email ?: ""
+                        editPhone = user?.phone ?: ""
+                        showEditDialog = true
+                    }
                     HorizontalDivider()
-                    ProfileMenuItem(Icons.Filled.CalendarMonth, "My Appointments") { }
+                    ProfileMenuItem(Icons.Filled.CalendarMonth, "My Appointments") {
+                        onNavigateToBookings()
+                    }
                     HorizontalDivider()
-                    ProfileMenuItem(Icons.Filled.Notifications, "Notification Settings") { }
+                    ProfileMenuItem(Icons.Filled.Notifications, "Notifications") {
+                        onNavigateToNotifications()
+                    }
                 }
             }
 
@@ -73,6 +97,30 @@ fun ProfileScreen(
                 Text("Logout")
             }
         }
+    }
+
+    // Edit Profile Dialog
+    if (showEditDialog) {
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Profile") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(value = editName, onValueChange = { editName = it }, label = { Text("Name") }, singleLine = true)
+                    OutlinedTextField(value = editEmail, onValueChange = { editEmail = it }, label = { Text("Email") }, singleLine = true)
+                    OutlinedTextField(value = editPhone, onValueChange = { editPhone = it }, label = { Text("Phone") }, singleLine = true)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    authViewModel.updateProfile(editName, editEmail, editPhone)
+                    showEditDialog = false
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) { Text("Cancel") }
+            }
+        )
     }
 }
 

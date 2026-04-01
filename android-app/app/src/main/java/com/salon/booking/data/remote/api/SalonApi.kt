@@ -29,6 +29,9 @@ interface SalonApi {
     @GET("users/me")
     suspend fun getProfile(): ApiResponse<User>
 
+    @PUT("users/me")
+    suspend fun updateProfile(@Body request: UpdateProfileRequest): ApiResponse<User>
+
     // Services
     @GET("services")
     suspend fun getServices(@Query("category") category: String? = null): ApiResponse<List<SalonService>>

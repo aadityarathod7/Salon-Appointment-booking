@@ -164,7 +164,7 @@ fun SalonNavGraph() {
                     HomeScreen(onBookClick = { navController.navigate(Screen.BookingFlow.route) })
                 }
                 composable(Screen.Services.route) {
-                    ServiceListScreen()
+                    ServiceListScreen(onBookClick = { navController.navigate(Screen.BookingFlow.route) })
                 }
                 composable(Screen.Bookings.route) {
                     AppointmentListScreen()
@@ -173,7 +173,23 @@ fun SalonNavGraph() {
                     NotificationScreen()
                 }
                 composable(Screen.Profile.route) {
-                    ProfileScreen(onLogout = { authViewModel.logout() })
+                    ProfileScreen(
+                        onLogout = { authViewModel.logout() },
+                        onNavigateToBookings = {
+                            navController.navigate(Screen.Bookings.route) {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onNavigateToNotifications = {
+                            navController.navigate(Screen.Notifications.route) {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
                 }
                 composable(Screen.BookingFlow.route) {
                     BookingFlowScreen(onDone = { navController.popBackStack() })

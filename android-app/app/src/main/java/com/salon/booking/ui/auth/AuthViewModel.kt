@@ -93,6 +93,15 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun updateProfile(name: String, email: String, phone: String) {
+        viewModelScope.launch {
+            authRepository.updateProfile(name, email, phone).fold(
+                onSuccess = { user -> _currentUser.value = user },
+                onFailure = { _errorMessage.value = it.message }
+            )
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
